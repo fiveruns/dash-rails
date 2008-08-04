@@ -1,7 +1,8 @@
+dash/rails.rb
 init.rb
 lib/fiveruns/dash/rails/version.rb
 lib/fiveruns/dash/rails.rb
+Manifest
 rails/init.rb
 Rakefile
 test/test_helper.rb
-Manifest
