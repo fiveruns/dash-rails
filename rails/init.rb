@@ -1,25 +1,11 @@
-gem 'fiveruns_dash'
+gem 'fiveruns_dash' # Put its path first
 require 'fiveruns/dash'
+Fiveruns::Dash.logger = RAILS_DEFAULT_LOGGER
 
 require 'fiveruns/dash/rails'
-
 Fiveruns::Dash::Rails.load_recipes
 
+require 'dispatcher'
 Dispatcher.to_prepare :check_configuration do
-  load_dash = if Fiveruns::Dash.configuration.options[:app]
-    true
-  else
-    # TODO: Add URL for help
-    message =<<-EOM
-FiveRuns Dash [Rails] (v#{Fiveruns::Dash::Rails::Version::STRING}) Application token missing
-  ===
-  In config/initializers/dash.rb or at the bottom of config/environment.rb, please add:
-  
-    Fiveruns::Dash.configure :app => 'YOUR-APP-TOKEN-HERE'
-    
-  See http://todo/path/to/help
-  ===
-    EOM
-    RAILS_DEFAULT_LOGGER.warn(message.strip)
-  end
+  Fiveruns::Dash::Rails.start
 end
