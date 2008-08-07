@@ -1,43 +1,9 @@
 gem 'fiveruns_dash'
 require 'fiveruns/dash'
 
-require 'fiveruns/dash/rails/version'
+require 'fiveruns/dash/rails'
 
-require 'dispatcher'
-
-load_dash = false
-loaded_gems = []
-
-# Load recipes from vendor/plugins
-Dir["#{RAILS_ROOT}/vendor/plugins/*/dash/**/*.rb"].each do |file|
-  require file
-end
-
-# Load recipes from vendor/gems
-Dir[File.join(RAILS_ROOT, 'vendor/gems/*')].each do |gem_path|
-  name = File.basename(gem_path).sub(/-\d+-\d+-\d+#{Regexp.quote File::SEPARATOR}?$/, '')
-  loaded_gems << name
-  Dir[File.join(gem_path, 'dash/**/*.rb')].each do |file|
-    require file
-  end
-end
-
-# Load recipes from configured system gems
-config.gems.each do |gem|
-  next if loaded_gems.include?(gem.name.to_s)
-  spec = Gem.source_index.search(Gem::Dependency.new(gem.name, gem.requirement)).sort_by { |s| s.version }.last
-  path = nil
-  Gem.path.find do |gem_dir|
-    location = File.join(gem_dir, 'gems', spec.full_name)
-    path = location if File.directory?(location)
-  end
-  if path
-    loaded_gems << gem.name.to_s
-    Dir[File.join(path, 'dash/**/*.rb')].each do |file|
-      require file
-    end
-  end
-end
+Fiveruns::Dash::Rails.load_recipes
 
 Dispatcher.to_prepare :check_configuration do
   load_dash = if Fiveruns::Dash.configuration.options[:app]

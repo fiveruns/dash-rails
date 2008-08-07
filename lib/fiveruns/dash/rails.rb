@@ -1,7 +1,17 @@
+require File.dirname(__FILE__) << "/rails/version"
+
 module Fiveruns
   module Dash
     
     module Rails
+      
+      # Just in case the plugin isn't being used a gem,
+      # and the packaged recipes aren't loaded automatically
+      def self.load_recipes
+        Dir[File.dirname(__FILE__) << "/../../../dash/**/*.rb"].each do |file|
+          require file
+        end
+      end
       
       module Context
       
