@@ -15,12 +15,6 @@ module Fiveruns
             context[0, 2]
           end
         end
-      
-        def self.action_context
-          if context
-            context[2, 2]
-          end
-        end
         
         def self.set(value)
           @context = value
