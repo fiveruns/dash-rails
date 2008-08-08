@@ -19,6 +19,11 @@ Fiveruns::Dash.register_recipe :activerecord, :url => 'http://dash.fiveruns.com'
   recipe.counter :deletes, 'Deletes', :incremented_by => deletes
 end
 
+Fiveruns::Dash.register_recipe :actionpack, :url => 'http://dash.fiveruns.com' do |recipe|
+  recipe.time :proc_time, 'Processing Time', :method => 'ActionController::Base#perform_action'
+  recipe.counter :requests, 'Requests', :incremented_by => 'ActionController::Base#perform_action'
+end
+
 Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |recipe|
   
   recipe.added do
@@ -27,7 +32,6 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
   end
   
   recipe.add_recipe :activerecord, :url => 'http://dash.fiveruns.com'
-  
   recipe.modify :recipe_name => :activerecord, :url => 'http://dash.fiveruns.com' do |metric|
     metric.find_context_with do |obj, *args|
       name = if obj.is_a?(ActiveRecord::Base)
@@ -35,7 +39,15 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
       else
         obj.name
       end
-      Array(Fiveruns::Dash::Rails::Context.context) + [:model, name]
+      namespace = [:model, name]
+      Array(Fiveruns::Dash::Rails::Context.context) + namespace
+    end
+  end
+  
+  recipe.add_recipe :actionpack, :url => 'http://dash.fiveruns.com'
+  recipe.modify :recipe_name => :actionpack, :url => 'http://dash.fiveruns.com' do |metric|
+    metric.find_context_with do |obj, *args|
+      Fiveruns::Dash::Rails::Context.context
     end
   end
   
