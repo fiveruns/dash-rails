@@ -1,12 +1,11 @@
-gem 'fiveruns_dash' # Put its path first
-require 'fiveruns/dash'
-Fiveruns::Dash.logger = RAILS_DEFAULT_LOGGER
+require 'fiveruns_dash_rails'
 
-require 'fiveruns/dash/rails'
+Fiveruns::Dash.logger = RAILS_DEFAULT_LOGGER
 
 Fiveruns::Dash::Rails.load_recipes
 
 Fiveruns::Dash.configure do |config|
+  config.add_recipe :ruby, :url => 'http://dash.fiveruns.com'
   config.add_recipe :rails, :url => 'http://dash.fiveruns.com'
 end
 

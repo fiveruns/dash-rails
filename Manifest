@@ -2,6 +2,7 @@ dash/rails.rb
 init.rb
 lib/fiveruns/dash/rails/version.rb
 lib/fiveruns/dash/rails.rb
+lib/fiveruns_dash_rails.rb
 Manifest
 rails/init.rb
 Rakefile
