@@ -40,7 +40,10 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
         obj.name
       end
       namespace = [:model, name]
-      Array(Fiveruns::Dash::Rails::Context.context) + namespace
+      [
+        nil,
+        Array(Fiveruns::Dash::Rails::Context.context) + namespace
+      ]
     end
   end
   
