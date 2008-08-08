@@ -3,6 +3,7 @@ require 'fiveruns/dash'
 Fiveruns::Dash.logger = RAILS_DEFAULT_LOGGER
 
 require 'fiveruns/dash/rails'
+
 Fiveruns::Dash::Rails.load_recipes
 
 Fiveruns::Dash.configure do |config|
