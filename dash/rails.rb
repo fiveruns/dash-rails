@@ -21,21 +21,21 @@ end
 
 Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |recipe|
   
-  recipe.included do
+  recipe.added do
     require File.dirname(__FILE__) << "/../lib/fiveruns/dash/rails"
     ActionController::Base.send(:include, Fiveruns::Dash::Rails::Context)
   end
   
   recipe.add_recipe :activerecord, :url => 'http://dash.fiveruns.com'
   
-  recipe.find :recipe_name => :activerecord, :url => 'http://dash.fiveruns.com' do |metric|
+  recipe.modify :recipe_name => :activerecord, :url => 'http://dash.fiveruns.com' do |metric|
     metric.find_context_with do |obj, *args|
       name = if obj.is_a?(ActiveRecord::Base)
         obj.class.name
       else
         obj.name
       end
-      Array(Fiveruns::Dash::Rails::Context.context.dup).push(:model, name)
+      Array(Fiveruns::Dash::Rails::Context.context) + [:model, name]
     end
   end
   
