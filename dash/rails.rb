@@ -32,7 +32,7 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
   end
   
   recipe.add_recipe :activerecord, :url => 'http://dash.fiveruns.com'
-  recipe.modify :recipe_name => :activerecord, :url => 'http://dash.fiveruns.com' do |metric|
+  recipe.modify :recipe_name => :activerecord, :recipe_url => 'http://dash.fiveruns.com' do |metric|
     metric.find_context_with do |obj, *args|
       name = if obj.is_a?(ActiveRecord::Base)
         obj.class.name
@@ -48,7 +48,7 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
   end
   
   recipe.add_recipe :actionpack, :url => 'http://dash.fiveruns.com'
-  recipe.modify :recipe_name => :actionpack, :url => 'http://dash.fiveruns.com' do |metric|
+  recipe.modify :recipe_name => :actionpack, :recipe_url => 'http://dash.fiveruns.com' do |metric|
     metric.find_context_with do |obj, *args|
       Fiveruns::Dash::Rails::Context.context
     end
