@@ -54,4 +54,8 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
     end
   end
   
+  recipe.add_exceptions_from 'ActionController::Base#perform_action_without_rescue' do |controller|
+    {:session => controller.session.data.to_yaml, :headers => controller.request.headers.to_yaml, :params => controller.params.inspect}
+  end
+  
 end
