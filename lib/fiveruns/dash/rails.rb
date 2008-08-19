@@ -56,7 +56,7 @@ FiveRuns Dash [Rails] (v#{Version::STRING}) Application token missing
         end
         
         def self.set(value)
-          @context = value
+          ::Fiveruns::Dash.sync { @context = value }
           if block_given?
             yield
             reset
@@ -64,7 +64,7 @@ FiveRuns Dash [Rails] (v#{Version::STRING}) Application token missing
         end
         
         def self.reset
-          @context = nil
+          ::Fiveruns::Dash.sync { @context = nil }
         end
       
         class << self
