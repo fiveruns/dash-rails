@@ -70,7 +70,7 @@ FiveRuns Dash [Rails] (v#{Version::STRING}) Application token missing
         module InstanceMethods
           def perform_action_with_fiveruns_dash_context(*args, &block)
             action_name = (request.parameters['action'] || 'index').to_s
-            Fiveruns::Dash::Rails::Context.set [:action, %(#{self.class.name}##{action_name})]
+            Fiveruns::Dash::Rails::Context.set ['action', %(#{self.class.name}##{action_name})]
             perform_action_without_fiveruns_dash_context(*args, &block)
           end
         end
