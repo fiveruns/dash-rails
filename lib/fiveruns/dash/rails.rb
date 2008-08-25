@@ -4,7 +4,35 @@ module Fiveruns
   module Dash
     
     module Rails
-            
+      
+      cattr_accessor :server
+      
+      def self.queue_size
+        return nil unless server_type
+        case server_type
+        when :mongrel
+          server.workers.list.size
+        else
+          # Skip
+        end
+      end
+      
+      def self.server_type
+        return @server_type if defined?(@server_type)
+        @server_type = if server          
+          case server.class.to_s
+          when /Mongrel/
+            :mongrel
+          else
+            ::Fiveruns::Dash.log :warn, "Unrecognized app server type: #{server.class}, not collecting queue size"
+            false
+          end
+        else
+          ::Fiveruns::Dash.log :warn, "Could not find app server, not collecting queue size"
+          nil
+        end
+      end
+                    
       # Just in case the plugin isn't being used a gem,
       # and the packaged recipes aren't loaded automatically
       def self.load_recipes

@@ -1,27 +1,29 @@
-Fiveruns::Dash.register_recipe :activerecord, :url => 'http://dash.fiveruns.com' do |recipe|
-  finds = %w(ActiveRecord::Base.find ActiveRecord::Base.find_by_sql)
-  recipe.time :find_time, 'Find Time', :methods => finds
-  recipe.counter :finds, 'Finds', :incremented_by => finds
+# * Average Action Response Time: per 1 min interval, most important metric to me?
+# ** Captured at 'response_time' metric by 'actionpack' recipe
+# * Action Requests?: per 1min interval, has to accompany 1 above?
+# ** Captured as 'requests' metric by 'actionpack' recipe
+# * ActiveRecord Activity Indicator: ?percent per 1 min interval, aggregate metric, tbd?
+# ** Captured as 'activity' metric by 'activerecord' recipe
+# * Includes slowest, most frequently called actions/models information
+# ** This feature is provided by the 'response_time' (actionpack) and 'activity' (activerecord)
+#    metrics and the metric store structure; a function of how the data is sliced
+# * Active Rails processes: unique PIDs reporting per interval, smoothed out for restarts?
+# ** These are captured as the number of 'Process' records
+# * Aggregated Rails Process CPU Usage: ?percent per 1 min interval?
+# ** Captured as 'cpu' metric by 'ruby' recipe
+# * Aggregated Rails Memory Usage?: percent per 1 min interval?
+# ** Captured as 'pmem' remtric by 'ruby' recipe
+# ** Also capturing as bytes in 'rss' metric by 'ruby' recipe
+# * Mongrel Queue Size?: If available?, alternative metric for thin?
 
-  creates = %w(ActiveRecord::Base.create)
-  recipe.time :create_time, 'Create Time', :methods => creates
-  recipe.counter :creates, 'Creates', :incremented_by => creates
-
-  updates = %w(ActiveRecord::Base.update ActiveRecord::Base.update_all
-              ActiveRecord::Base#update
-              ActiveRecord::Base#save ActiveRecord::Base#save!)
-  recipe.time :update_time, 'Update Time', :methods => updates
-  recipe.counter :updates, 'Updates', :incremented_by => updates
-
-  deletes  = %w(ActiveRecord::Base#destroy ActiveRecord::Base.destroy ActiveRecord::Base.destroy_all
-               ActiveRecord::Base.delete ActiveRecord::Base.delete_all)
-  recipe.time :delete_time, 'Delete Time', :methods => deletes
-  recipe.counter :deletes, 'Deletes', :incremented_by => deletes
-end
 
 Fiveruns::Dash.register_recipe :actionpack, :url => 'http://dash.fiveruns.com' do |recipe|
-  recipe.time :proc_time, 'Processing Time', :method => 'ActionController::Base#perform_action'
+  recipe.time :response_time, :method => 'ActionController::Base#perform_action'
   recipe.counter :requests, 'Requests', :incremented_by => 'ActionController::Base#perform_action'
+end
+
+Fiveruns::Dash.register_recipe :activerecord, :url => 'http://dash.fiveruns.com' do |recipe|
+  recipe.time :activity, :method => 'ActionController::Base.execute'
 end
 
 Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |recipe|
@@ -29,6 +31,11 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
   recipe.added do
     require File.dirname(__FILE__) << "/../lib/fiveruns/dash/rails"
     ActionController::Base.send(:include, Fiveruns::Dash::Rails::Context)
+    ObjectSpace.each_object do |obj|
+      if obj.class == Mongrel::HttpServer
+        Fiveruns::Dash::Rails.server = obj
+      end
+    end
   end
   
   recipe.add_recipe :activerecord, :url => 'http://dash.fiveruns.com'
@@ -62,6 +69,10 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
       Fiveruns::Dash.logger.warn "Could not retrieve session data for exception"
     end
     {:session => session_data, :headers => controller.request.headers.to_yaml, :params => controller.params.inspect}
+  end
+  
+  recipe.absolute :queue_size do
+    Fiveruns::Dash::Rails.queue_size
   end
   
 end
