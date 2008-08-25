@@ -13,7 +13,7 @@ module Fiveruns
         return nil unless server_type
         case server_type
         when :mongrel
-          server.workers.list.size
+          server.workers.list.length
         else
           # Skip
         end
