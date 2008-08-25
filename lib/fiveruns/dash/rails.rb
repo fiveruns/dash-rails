@@ -5,7 +5,9 @@ module Fiveruns
     
     module Rails
       
-      cattr_accessor :server
+      class << self
+        attr_accessor :server
+      end
       
       def self.queue_size
         return nil unless server_type

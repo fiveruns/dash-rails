@@ -4,7 +4,7 @@ Fiveruns::Dash.register_recipe :actionpack, :url => 'http://dash.fiveruns.com' d
 end
 
 Fiveruns::Dash.register_recipe :activerecord, :url => 'http://dash.fiveruns.com' do |recipe|
-  recipe.time :activity, :method => 'ActionController::Base.execute'
+  recipe.time :activity, :method => 'ActiveRecord::ConnectionAdapters::AbstractAdapter#execute'
 end
 
 Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |recipe|
@@ -12,28 +12,30 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
   recipe.added do
     require File.dirname(__FILE__) << "/../lib/fiveruns/dash/rails"
     ActionController::Base.send(:include, Fiveruns::Dash::Rails::Context)
-    ObjectSpace.each_object do |obj|
-      if obj.class == Mongrel::HttpServer
-        Fiveruns::Dash::Rails.server = obj
+    if defined?(Mongrel)
+      ObjectSpace.each_object do |obj|
+        if obj.class == Mongrel::HttpServer
+          Fiveruns::Dash::Rails.server = obj
+        end
       end
     end
   end
   
   recipe.add_recipe :activerecord, :url => 'http://dash.fiveruns.com'
-  recipe.modify :recipe_name => :activerecord, :recipe_url => 'http://dash.fiveruns.com' do |metric|
-    metric.find_context_with do |obj, *args|
-      name = if obj.is_a?(ActiveRecord::Base)
-        obj.class.name
-      else
-        obj.name
-      end
-      namespace = ['model', name]
-      [
-        nil,
-        Array(Fiveruns::Dash::Rails::Context.context) + namespace
-      ]
-    end
-  end
+  # recipe.modify :recipe_name => :activerecord, :recipe_url => 'http://dash.fiveruns.com' do |metric|
+  #   metric.find_context_with do |obj, *args|
+  #     name = if obj.is_a?(ActiveRecord::Base)
+  #       obj.class.name
+  #     else
+  #       obj.name
+  #     end
+  #     namespace = ['model', name]
+  #     [
+  #       nil,
+  #       Array(Fiveruns::Dash::Rails::Context.context) + namespace
+  #     ]
+  #   end
+  # end
   
   recipe.add_recipe :actionpack, :url => 'http://dash.fiveruns.com'
   recipe.modify :recipe_name => :actionpack, :recipe_url => 'http://dash.fiveruns.com' do |metric|
