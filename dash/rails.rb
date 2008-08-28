@@ -40,7 +40,10 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
   recipe.add_recipe :actionpack, :url => 'http://dash.fiveruns.com'
   recipe.modify :recipe_name => :actionpack, :recipe_url => 'http://dash.fiveruns.com' do |metric|
     metric.find_context_with do |obj, *args|
-      Fiveruns::Dash::Rails::Context.context
+      [
+        nil,
+        Fiveruns::Dash::Rails::Context.context
+      ]
     end
   end
   
