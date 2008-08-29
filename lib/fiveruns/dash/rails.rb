@@ -10,12 +10,12 @@ module Fiveruns
       end
       
       def self.queue_size
-        return nil unless server_type
+        return 0 unless server_type
         case server_type
         when :mongrel
           server.workers.list.length
         else
-          # Skip
+          0 # Skip
         end
       end
       
