@@ -26,11 +26,11 @@ module Fiveruns
           when /Mongrel/
             :mongrel
           else
-            ::Fiveruns::Dash.log :warn, "Unrecognized app server type: #{server.class}, not collecting queue size"
+            ::Fiveruns::Dash.logger.warn "Unrecognized app server type: #{server.class}, not collecting queue size"
             false
           end
         else
-          ::Fiveruns::Dash.log :warn, "Could not find app server, not collecting queue size"
+          ::Fiveruns::Dash.logger.warn "Could not find app server, not collecting queue size"
           nil
         end
       end
