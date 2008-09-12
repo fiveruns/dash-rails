@@ -1,6 +1,13 @@
 Fiveruns::Dash.register_recipe :actionpack, :url => 'http://dash.fiveruns.com' do |recipe|
   recipe.time :response_time, :method => 'ActionController::Base#perform_action'
   recipe.counter :requests, 'Requests', :incremented_by => 'ActionController::Base#perform_action'
+  
+  if defined?(ActionView::Template)  
+    recipe.time :render_time, :method => %w(ActionView::Template#render ActionView::PartialTemplate#render)
+  else
+    Fiveruns::Dash.logger.warn 'Collection of "render_time" unsupported for this version of Rails'
+  end
+  
 end
 
 Fiveruns::Dash.register_recipe :activerecord, :url => 'http://dash.fiveruns.com' do |recipe|
@@ -25,20 +32,21 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
   recipe.modify :recipe_name => :activerecord, :recipe_url => 'http://dash.fiveruns.com' do |metric|
     metric.find_context_with do |obj, *args|
       namespace = ['model', obj.name]
-      [
-        nil,
-        Array(Fiveruns::Dash::Rails::Context.context) + namespace
-      ]
+      [nil, Array(Fiveruns::Dash::Rails::Context.context) + namespace]
     end
   end
   
   recipe.add_recipe :actionpack, :url => 'http://dash.fiveruns.com'
   recipe.modify :recipe_name => :actionpack, :recipe_url => 'http://dash.fiveruns.com' do |metric|
-    metric.find_context_with do |obj, *args|
-      [
-        nil,
-        Fiveruns::Dash::Rails::Context.context
-      ]
+    if metric.name.to_s == 'render_time'
+      metric.find_context_with do |obj, *args|
+        namespace = ['view', obj.path]
+        [nil, Fiveruns::Dash::Rails::Context.context + namespace]
+      end
+    else
+      metric.find_context_with do |obj, *args|
+        [nil, Fiveruns::Dash::Rails::Context.context]
+      end
     end
   end
   
