@@ -90,11 +90,11 @@ FiveRuns Dash [Rails] (v#{Version::STRING}) Application token missing
         end
         
         def self.reset
-          ::Fiveruns::Dash.sync { @context = nil }
+          ::Fiveruns::Dash.sync { @context = [] }
         end
       
-        class << self
-          attr_reader :context
+        def self.context
+          @context ||= []
         end
       
         module InstanceMethods
