@@ -40,7 +40,7 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
   recipe.modify :recipe_name => :actionpack, :recipe_url => 'http://dash.fiveruns.com' do |metric|
     if metric.name.to_s == 'render_time'
       metric.find_context_with do |obj, *args|
-        namespace = ['view', obj.path]
+        namespace = ['view', obj.path.sub(/^#{Regexp.quote RAILS_ROOT}\//, '')]
         [nil, Fiveruns::Dash::Rails::Context.context + namespace]
       end
     else
