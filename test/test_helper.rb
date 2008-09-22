@@ -8,5 +8,5 @@ $:.unshift(File.dirname(__FILE__) << '/../lib')
 require 'fiveruns/dash'
 
 class Test::Unit::TestCase
-  include Fiveruns::Dash  
+  include Fiveruns::Dash
 end
