@@ -5,8 +5,8 @@ require 'flexmock/test_unit'
 
 $:.unshift(File.dirname(__FILE__) << '/../lib')
 # Require library files
-require 'fiveruns/dash/rails'
+require 'fiveruns/dash'
 
 class Test::Unit::TestCase
-  
+  include Fiveruns::Dash  
 end

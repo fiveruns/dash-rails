@@ -1,3 +1,4 @@
+# ActionPack ##################################################################
 Fiveruns::Dash.register_recipe :actionpack, :url => 'http://dash.fiveruns.com' do |recipe|
   recipe.time :response_time, :method => 'ActionController::Base#perform_action'
   recipe.counter :requests, 'Requests', :incremented_by => 'ActionController::Base#perform_action'
@@ -7,15 +8,15 @@ Fiveruns::Dash.register_recipe :actionpack, :url => 'http://dash.fiveruns.com' d
   else
     Fiveruns::Dash.logger.warn 'Collection of "render_time" unsupported for this version of Rails'
   end
-  
 end
 
+# ActiveRecord ################################################################
 Fiveruns::Dash.register_recipe :activerecord, :url => 'http://dash.fiveruns.com' do |recipe|
   recipe.time :activity, :methods => %w(ActiveRecord::Base.find_by_sql ActiveRecord::Base.calculate)
 end
 
-Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |recipe|
-  
+# Rails #######################################################################
+Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |recipe|  
   recipe.added do
     require File.dirname(__FILE__) << "/../lib/fiveruns/dash/rails"
     ActionController::Base.send(:include, Fiveruns::Dash::Rails::Context)
