@@ -2,7 +2,26 @@ require 'test_helper'
 
 RAILS_ROOT = 'ZOINKS'
 
-class TestRailsRecipe < Test::Unit::TestCase
+ActionController::Routing::Routes.draw do |map|
+  map.connect ':controller/:action/:id'
+end
+
+class FixturesController < ActionController::Base
+  
+  append_view_path File.join(File.dirname(__FILE__))
+  
+  def simple
+    render :action => 'simple'
+  end
+  
+  def simple_layout
+    render :action => 'simple', :layout => 'simple'
+  end
+end
+
+class TestRailsRecipe < ActionController::TestCase
+  tests FixturesController
+  
   context "fiveruns_dash_rails plugin" do
     setup do
       Fiveruns::Dash.recipes.clear
@@ -22,22 +41,15 @@ class TestRailsRecipe < Test::Unit::TestCase
     context "view recipe" do
       
       setup do
-        view_fixtures = File.join(File.dirname(__FILE__), 'fixtures')
-        ActionView::TemplateFinder.process_view_paths(view_fixtures)
-        @view = ActionView::Base.new(view_fixtures)
-        
         @metric = Fiveruns::Dash::TimeMetric.new(:render_time, :method => 'ActionView::Template#render')
         Fiveruns::Dash::Rails.contextualize_action_pack(@metric)
         @metric.info_id = 42 # eh?
-        
       end
       
       should 'record one context for a template' do
-        path = 'simple.erb'
-        template = ActionView::Template.new(@view, path, true)
-        template.render
+        get :simple
         
-        assert_equal ['view', path], 
+        assert_equal ['view', 'fixtures/simple'], 
                      @metric.data[:values].first[:context]
       end
       
