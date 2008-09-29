@@ -49,14 +49,28 @@ class TestRailsRecipe < ActionController::TestCase
       should 'record one context for a template' do
         get :simple
         
-        assert_equal ['view', 'fixtures/simple'], 
-                     @metric.data[:values].first[:context]
+        assert_metric_contains ['view', 'fixtures/simple']
       end
       
-      should_eventually 'record two contexts for a template and a layout'
+      should 'record two contexts for a template and a layout' do
+        get :simple_layout
+        
+        # puts @metric.data.inspect
+        
+        assert_metric_contains ['view', 'layouts/simple']
+      end
       
       should_eventually 'record three contexts for a template, partial and layout'
       should_eventually 'record contexts for a template, partial collection and layout'
     end
+    
   end
+  
+  private
+  
+    def assert_metric_contains(ns)
+      data = @metric.data[:values]
+      assert data.select { |hsh| hsh[:context] == ns }
+    end
+  
 end
