@@ -108,7 +108,9 @@ FiveRuns Dash [Rails] (v#{Version::STRING}) Application token missing
             #             future, we need a more advanced sampling mechanism (some operation in a recipe a
             #             request must pass, or selection criteria returned in a response from the service)
             if params['trace']
-              ::Fiveruns::Dash.session.trace { operation.call }
+              ::Fiveruns::Dash.session.trace "Action #{params['controller'].camelize}Controller##{params['action']}" do
+                operation.call
+              end
             else
               operation.call
             end
