@@ -39,16 +39,7 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
   
   recipe.add_recipe :actionpack, :url => 'http://dash.fiveruns.com'
   recipe.modify :recipe_name => :actionpack, :recipe_url => 'http://dash.fiveruns.com' do |metric|
-    if metric.name.to_s == 'render_time'
-      metric.find_context_with do |obj, *args|
-        namespace = ['view', obj.path.sub(/^#{Regexp.quote RAILS_ROOT}\//, '')]
-        [nil, Fiveruns::Dash::Rails::Context.context + namespace]
-      end
-    else
-      metric.find_context_with do |obj, *args|
-        [nil, Fiveruns::Dash::Rails::Context.context]
-      end
-    end
+    Fiveruns::Dash::Rails.contextualize_action_pack(metric)
   end
   
   recipe.add_exceptions_from 'ActionController::Base#perform_action_without_rescue' do |controller|

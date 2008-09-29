@@ -81,7 +81,22 @@ if START_FIVERUNS_DASH_RAILS
           RAILS_DEFAULT_LOGGER.warn(message.strip)
         end
       
-        module Context
+      def self.contextualize_action_pack(metric)
+        if metric.name.to_s == 'render_time'
+          # puts "BONK!"
+          metric.find_context_with do |obj, *args|
+            # puts "HONK: #{obj.class}, #{args.inspect}"
+            namespace = ['view', obj.path.sub(/^#{Regexp.quote RAILS_ROOT}\//, '')]
+            [nil, Fiveruns::Dash::Rails::Context.context + namespace]
+          end
+        else
+          metric.find_context_with do |obj, *args|
+            [nil, Fiveruns::Dash::Rails::Context.context]
+          end
+        end
+      end
+      
+      module Context
       
           def self.included(base)
             base.send(:include, InstanceMethods)
