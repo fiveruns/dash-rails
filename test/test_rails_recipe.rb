@@ -19,6 +19,7 @@ class FixturesController < ActionController::Base
   end
   
   def compound
+    render :action => 'compound', :layout => 'simple'
   end
   
   def compound_collection
@@ -49,7 +50,7 @@ class TestRailsRecipe < ActionController::TestCase
     context "view recipe" do
       
       setup do
-        @metric = Fiveruns::Dash::TimeMetric.new(:render_time, :method => 'ActionView::Template#render')
+        @metric = Fiveruns::Dash::TimeMetric.new(:render_time, :method => %w(ActionView::Template#render ActionView::PartialTemplate#render))
         Fiveruns::Dash::Rails.contextualize_action_pack(@metric)
         @metric.info_id = 42 # eh?
       end
@@ -59,20 +60,42 @@ class TestRailsRecipe < ActionController::TestCase
         assert_metric_contains ['view', 'fixtures/simple']
       end
       
-      should 'record two contexts for a template and a layout' do
-        get :simple_layout
-        assert_metric_contains ['view', 'layouts/simple']
+      context 'for a template and a layout' do
+        
+        setup { get :simple_layout }
+        
+        should 'record the layout' do
+          assert_metric_contains ['view', 'layouts/simple']
+        end
+        
+        should 'record the action' do
+          assert_metric_contains ['view', 'fixtures/simple']
+        end
+        
       end
       
-      should 'record three contexts for a template, partial and layout' do
-        get :compound
-        assert_metric_contains ['view', 'simple/_foo']
+      context 'for a template, partial and layout' do
+        
+        setup { get :compound }
+        
+        should 'record the layout' do
+          assert_metric_contains ['view', 'layouts/simple']
+        end
+        
+        should 'record the action' do
+          assert_metric_contains ['view', 'fixtures/compound']
+        end
+        
+        should_eventually 'record the partial inside the action' do
+          assert_metric_contains ['view', 'simple', 'view', 'simple/_foo']
+        end
+        
       end
       
       should 'record contexts for a template, partial collection and layout' do
         get :compound_collection
         
-        assert_metric_contains ['view', 'simple/_foo']
+        assert_metric_contains ['view', 'fixtures/_bar']
       end
     end
     
@@ -82,7 +105,7 @@ class TestRailsRecipe < ActionController::TestCase
   
     def assert_metric_contains(ns)
       data = @metric.data[:values]
-      assert data.select { |hsh| hsh[:context] == ns }
+      assert data.any? { |hsh| hsh[:context] == ns }, "could not find #{ns.inspect} in #{data.inspect}"
     end
   
 end
