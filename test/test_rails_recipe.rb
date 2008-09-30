@@ -11,12 +11,20 @@ class FixturesController < ActionController::Base
   append_view_path File.join(File.dirname(__FILE__))
   
   def simple
-    render :action => 'simple'
+    render :action => 'simple', :layout => false
   end
   
   def simple_layout
     render :action => 'simple', :layout => 'simple'
   end
+  
+  def compound
+  end
+  
+  def compound_collection
+    @numbers = (1..5).to_a
+  end
+  
 end
 
 class TestRailsRecipe < ActionController::TestCase
@@ -48,20 +56,24 @@ class TestRailsRecipe < ActionController::TestCase
       
       should 'record one context for a template' do
         get :simple
-        
         assert_metric_contains ['view', 'fixtures/simple']
       end
       
       should 'record two contexts for a template and a layout' do
         get :simple_layout
-        
-        # puts @metric.data.inspect
-        
         assert_metric_contains ['view', 'layouts/simple']
       end
       
-      should_eventually 'record three contexts for a template, partial and layout'
-      should_eventually 'record contexts for a template, partial collection and layout'
+      should 'record three contexts for a template, partial and layout' do
+        get :compound
+        assert_metric_contains ['view', 'simple/_foo']
+      end
+      
+      should 'record contexts for a template, partial collection and layout' do
+        get :compound_collection
+        
+        assert_metric_contains ['view', 'simple/_foo']
+      end
     end
     
   end
