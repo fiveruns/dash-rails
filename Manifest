@@ -1,5 +1,6 @@
 dash/rails.rb
 init.rb
+lib/fiveruns/dash/rails/startup.rb
 lib/fiveruns/dash/rails/version.rb
 lib/fiveruns/dash/rails.rb
 lib/fiveruns_dash_rails.rb
@@ -7,3 +8,4 @@ Manifest
 rails/init.rb
 Rakefile
 test/test_helper.rb
+test/test_rails_recipe.rb
