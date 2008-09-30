@@ -86,8 +86,8 @@ class TestRailsRecipe < ActionController::TestCase
           assert_metric_contains ['view', 'fixtures/compound']
         end
         
-        should_eventually 'record the partial inside the action' do
-          assert_metric_contains ['view', 'simple', 'view', 'simple/_foo']
+        should 'record the partial inside the action' do
+          assert_metric_contains ['view', 'fixtures/compound', 'view', 'fixtures/_foo']
         end
         
       end
@@ -103,9 +103,11 @@ class TestRailsRecipe < ActionController::TestCase
   
   private
   
-    def assert_metric_contains(ns)
+    def assert_metric_contains(context)
       data = @metric.data[:values]
-      assert data.any? { |hsh| hsh[:context] == ns }, "could not find #{ns.inspect} in #{data.inspect}"
+      context_found = lambda { |hsh| hsh[:context] == context }
+      assert data.any?(&context_found), 
+             "could not find #{context.inspect} in #{data.inspect}"
     end
   
 end
