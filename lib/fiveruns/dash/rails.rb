@@ -110,8 +110,9 @@ if START_FIVERUNS_DASH_RAILS
               # TODO/FIXME: For now, we simply look for a 'trace' parameter to select requests to trace; in the
               #             future, we need a more advanced sampling mechanism (some operation in a recipe a
               #             request must pass, or selection criteria returned in a response from the service)
-              if params['trace']
-                ::Fiveruns::Dash.session.trace([:action, "#{params['controller'].camelize}Controller##{params['action']}"]) do
+              trace_context = ['action', "#{params['controller'].camelize}Controller##{params['action']}"]
+              if Fiveruns::Dash.trace_contexts.include?(trace_context)
+                ::Fiveruns::Dash.session.trace(trace_contexts) do
                   operation.call
                 end
               else
