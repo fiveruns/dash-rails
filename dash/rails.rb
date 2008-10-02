@@ -19,7 +19,13 @@ end
 Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |recipe|  
   recipe.added do
     require File.dirname(__FILE__) << "/../lib/fiveruns/dash/rails"
-    ActionController::Base.send(:include, Fiveruns::Dash::Rails::Context)
+    ActionController::Base.send(:include, 
+                                Fiveruns::Dash::Rails::ActionContext)
+    ActionView::Template.send(:include, 
+                              Fiveruns::Dash::Rails::ViewContext)
+    ActionView::PartialTemplate.send(:include, 
+                                     Fiveruns::Dash::Rails::ViewContext)
+    
     if defined?(Mongrel)
       ObjectSpace.each_object do |obj|
         if obj.class == Mongrel::HttpServer

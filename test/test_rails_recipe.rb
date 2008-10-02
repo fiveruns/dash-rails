@@ -52,6 +52,13 @@ class TestRailsRecipe < ActionController::TestCase
       setup do
         @metric = Fiveruns::Dash::TimeMetric.new(:render_time, :method => %w(ActionView::Template#render ActionView::PartialTemplate#render))
         Fiveruns::Dash::Rails.contextualize_action_pack(@metric)
+        
+        # FIXME: ugly duplication
+        ActionView::Template.send(:include, 
+                                  Fiveruns::Dash::Rails::ViewContext)
+        ActionView::PartialTemplate.send(:include, 
+                                         Fiveruns::Dash::Rails::ViewContext)
+        
         @metric.info_id = 42 # eh?
       end
       
