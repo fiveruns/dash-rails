@@ -111,8 +111,8 @@ if START_FIVERUNS_DASH_RAILS
               #             future, we need a more advanced sampling mechanism (some operation in a recipe a
               #             request must pass, or selection criteria returned in a response from the service)
               trace_context = ['action', "#{params['controller'].camelize}Controller##{params['action']}"]
-              if Fiveruns::Dash.trace_contexts.include?(trace_context)
-                ::Fiveruns::Dash.session.trace(trace_contexts) do
+              if ::Fiveruns::Dash.trace_contexts.include?(trace_context)
+                ::Fiveruns::Dash.session.trace(trace_context) do
                   operation.call
                 end
               else
