@@ -1,7 +1,5 @@
 require 'test_helper'
 
-RAILS_ROOT = 'ZOINKS'
-
 ActionController::Routing::Routes.draw do |map|
   map.connect ':controller/:action/:id'
 end
@@ -52,15 +50,18 @@ class TestRailsRecipe < ActionController::TestCase
       setup do
         @metric = Fiveruns::Dash::TimeMetric.new(:render_time, :method => %w(ActionView::Template#render ActionView::PartialTemplate#render))
         Fiveruns::Dash::Rails.contextualize_action_pack(@metric)
-        
-        # FIXME: ugly duplication
-        ActionView::Template.send(:include, 
-                                  Fiveruns::Dash::Rails::ViewContext)
-        ActionView::PartialTemplate.send(:include, 
-                                         Fiveruns::Dash::Rails::ViewContext)
-        
         @metric.info_id = 42 # eh?
+        
+        unless ActionView::Template.included_modules.include?(Fiveruns::Dash::Rails::ViewContext)
+          # FIXME: ugly duplication
+          ActionView::Template.send(:include, 
+                                    Fiveruns::Dash::Rails::ViewContext)
+          ActionView::PartialTemplate.send(:include, 
+                                           Fiveruns::Dash::Rails::ViewContext)
+        end
       end
+      
+      teardown { Fiveruns::Dash::Rails::ViewContext.reset }
       
       should 'record one context for a template' do
         get :simple
@@ -112,7 +113,15 @@ class TestRailsRecipe < ActionController::TestCase
   
     def assert_metric_contains(context)
       data = @metric.data[:values]
-      context_found = lambda { |hsh| hsh[:context] == context }
+      
+      context_found = lambda do |hsh|
+        result = false
+        hsh[:context].each_slice(context.length) do |slice|
+          result = true if slice == context
+        end
+        result
+      end
+      
       assert data.any?(&context_found), 
              "could not find #{context.inspect} in #{data.inspect}"
     end
