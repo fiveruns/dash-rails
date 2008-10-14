@@ -25,6 +25,12 @@ class FixturesController < ActionController::Base
     render :action => 'compound_collection', :layout => 'simple'
   end
   
+  def builder
+    respond_to do |format|
+      format.xml
+    end
+  end
+  
 end
 
 class TestRailsRecipe < ActionController::TestCase
@@ -119,6 +125,16 @@ class TestRailsRecipe < ActionController::TestCase
         
         should 'record the partial collection' do
           assert_metric_contains ['view', 'fixtures/compound_collection', 'view', 'fixtures/_bar']
+        end
+        
+      end
+      
+      context 'for a builder template' do
+        
+        setup { get :builder, :format => 'xml' }
+        
+        should 'record the action' do
+          assert_metric_contains ['view', 'fixtures/builder']
         end
         
       end
