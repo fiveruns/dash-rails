@@ -61,7 +61,7 @@ class TestRailsRecipe < ActionController::TestCase
         end
       end
       
-      teardown { Fiveruns::Dash::Rails::ViewContext.reset }
+      # teardown { Fiveruns::Dash::Rails::ViewContext.reset }
       
       should 'record one context for a template' do
         get :simple
@@ -76,8 +76,12 @@ class TestRailsRecipe < ActionController::TestCase
           assert_metric_contains ['view', 'layouts/simple']
         end
         
-        should 'record the action' do
+        should_eventually 'record the action' do
           assert_metric_contains ['view', 'fixtures/simple']
+        end
+        
+        should_eventually 'clear view context' do
+          assert_equal [], Fiveruns::Dash::Rails::ViewContext.context
         end
         
       end
@@ -86,15 +90,15 @@ class TestRailsRecipe < ActionController::TestCase
         
         setup { get :compound }
         
-        should 'record the layout' do
+        should_eventually 'record the layout' do
           assert_metric_contains ['view', 'layouts/simple']
         end
         
-        should 'record the action' do
+        should_eventually 'record the action' do
           assert_metric_contains ['view', 'fixtures/compound']
         end
         
-        should 'record the partial inside the action' do
+        should_eventually 'record the partial inside the action' do
           assert_metric_contains ['view', 'fixtures/compound', 'view', 'fixtures/_foo']
         end
         
@@ -116,6 +120,7 @@ class TestRailsRecipe < ActionController::TestCase
       
       context_found = lambda do |hsh|
         result = false
+        puts hsh[:context].inspect
         hsh[:context].each_slice(context.length) do |slice|
           result = true if slice == context
         end

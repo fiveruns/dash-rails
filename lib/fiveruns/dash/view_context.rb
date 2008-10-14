@@ -30,7 +30,7 @@ module Fiveruns::Dash::Rails::ViewContext
   module InstanceMethods
     
     def render_with_fiveruns_dash_context(*args, &block)
-      original_context = Fiveruns::Dash::Rails::ViewContext.context
+      original_context = Fiveruns::Dash::Rails::ViewContext.context.dup
       
       template = Fiveruns::Dash::Rails::ViewContext.sanitize_view_path(path)
       Fiveruns::Dash::Rails::ViewContext.context << 'view'
