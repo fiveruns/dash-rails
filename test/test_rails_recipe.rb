@@ -22,6 +22,7 @@ class FixturesController < ActionController::Base
   
   def compound_collection
     @numbers = (1..5).to_a
+    render :action => 'compound_collection', :layout => 'simple'
   end
   
 end
@@ -104,11 +105,24 @@ class TestRailsRecipe < ActionController::TestCase
         
       end
       
-      should 'record contexts for a template, partial collection and layout' do
-        get :compound_collection
+      context 'for a template, partial collection and layout' do
         
-        assert_metric_contains ['view', 'fixtures/_bar']
+        setup { get :compound_collection }
+        
+        should 'record the layout' do
+          assert_metric_contains ['view', 'layouts/simple']
+        end
+        
+        should 'record the action' do
+          assert_metric_contains ['view', 'fixtures/compound_collection']
+        end
+        
+        should 'record the partial collection' do
+          assert_metric_contains ['view', 'fixtures/compound_collection', 'view', 'fixtures/_bar']
+        end
+        
       end
+      
     end
     
   end
