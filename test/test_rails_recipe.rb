@@ -70,6 +70,11 @@ class TestRailsRecipe < ActionController::TestCase
       
       # teardown { Fiveruns::Dash::Rails::ViewContext.reset }
       
+      should 'return the result of rendering' do
+        get :simple
+        assert_equal @response.body, 'Hi!'
+      end
+      
       should 'record one context for a template' do
         get :simple
         assert_metric_contains ['view', 'fixtures/simple']

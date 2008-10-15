@@ -36,9 +36,10 @@ module Fiveruns::Dash::Rails::ViewContext
       Fiveruns::Dash::Rails::ViewContext.context << 'view'
       Fiveruns::Dash::Rails::ViewContext.context << template
       
-      render_without_fiveruns_dash_context(*args, &block)
+      result = render_without_fiveruns_dash_context(*args, &block)
       
       Fiveruns::Dash::Rails::ViewContext.set original_context
+      return result
     end
     
   end
