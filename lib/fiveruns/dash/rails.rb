@@ -55,7 +55,7 @@ if START_FIVERUNS_DASH_RAILS
             log_error unless ::Rails.env == 'development'
           end
         end
-      
+        
         def self.configure(tokens = {}, &block)
           tokens.each do |environment, token|
             if environment.to_s == ::Rails.env
@@ -64,7 +64,7 @@ if START_FIVERUNS_DASH_RAILS
             end
           end
         end
-      
+        
         def self.log_error
           # TODO: Add URL for help
           message =<<-EOM
@@ -80,77 +80,78 @@ if START_FIVERUNS_DASH_RAILS
           EOM
           RAILS_DEFAULT_LOGGER.warn(message.strip)
         end
-      
-      def self.contextualize_action_pack(metric)
-        if metric.name.to_s == 'render_time'
-          metric.find_context_with do |obj, *args|
-            Fiveruns::Dash::Rails::Context.context
-          end
-        else
-          metric.find_context_with do |obj, *args|
-            [nil, Fiveruns::Dash::Rails::Context.context]
-          end
-        end
-      end
-      
-      module Context
-        def self.set(value)
-          ::Fiveruns::Dash.sync { @context = value }
-        end
         
-        def self.reset
-          ::Fiveruns::Dash.sync { @context = [] }
-        end
-        
-        def self.context
-          @context ||= []
-        end
-      end
-      
-      module ActionContext
-      
-        def self.included(base)
-          base.send(:include, InstanceMethods)
-          base.alias_method_chain :perform_action, :fiveruns_dash_context
-          base.extend(ClassMethods)
-          (class << base; self; end).alias_method_chain :process, :fiveruns_dash_tracing
-        end
-        
-        module ClassMethods
-        
-          def process_with_fiveruns_dash_tracing(*args, &block)
-            operation = lambda { process_without_fiveruns_dash_tracing(*args, &block) }
-            params = args.first.parameters
-            # TODO/FIXME: For now, we simply look for a 'trace' parameter to select requests to trace; in the
-            #             future, we need a more advanced sampling mechanism (some operation in a recipe a
-            #             request must pass, or selection criteria returned in a response from the service)
-            trace_context = ['action', "#{params['controller'].camelize}Controller##{params['action']}"]
-            if ::Fiveruns::Dash.trace_contexts.include?(trace_context)
-              ::Fiveruns::Dash.session.trace(trace_context) do
-                operation.call
-              end
-            else
-              operation.call
+        def self.contextualize_action_pack(metric)
+          if metric.name.to_s == 'render_time'
+            metric.find_context_with do |obj, *args|
+              Fiveruns::Dash::Rails::Context.context
+            end
+          else
+            metric.find_context_with do |obj, *args|
+              [nil, Fiveruns::Dash::Rails::Context.context]
             end
           end
-        
         end
-      
-        module InstanceMethods 
-                    
-          def perform_action_with_fiveruns_dash_context(*args, &block)
-            action_name = (request.parameters['action'] || 'index').to_s
-            Fiveruns::Dash::Rails::Context.set ['action', %(#{self.class.name}##{action_name})]
-            perform_action_without_fiveruns_dash_context(*args, &block)
+        
+        module Context
+          def self.set(value)
+            ::Fiveruns::Dash.sync { @context = value }
           end
         
+          def self.reset
+            ::Fiveruns::Dash.sync { @context = [] }
+          end
+        
+          def self.context
+            @context ||= []
+          end
         end
+        
+        module ActionContext
       
-      end
+          def self.included(base)
+            base.send(:include, InstanceMethods)
+            base.alias_method_chain :perform_action, :fiveruns_dash_context
+            base.extend(ClassMethods)
+            (class << base; self; end).alias_method_chain :process, :fiveruns_dash_tracing
+          end
+        
+          module ClassMethods
+        
+            def process_with_fiveruns_dash_tracing(*args, &block)
+              operation = lambda { process_without_fiveruns_dash_tracing(*args, &block) }
+              params = args.first.parameters
+              # TODO/FIXME: For now, we simply look for a 'trace' parameter to select requests to trace; in the
+              #             future, we need a more advanced sampling mechanism (some operation in a recipe a
+              #             request must pass, or selection criteria returned in a response from the service)
+              trace_context = ['action', "#{params['controller'].camelize}Controller##{params['action']}"]
+              if ::Fiveruns::Dash.trace_contexts.include?(trace_context)
+                ::Fiveruns::Dash.session.trace(trace_context) do
+                  operation.call
+                end
+              else
+                operation.call
+              end
+            end
+        
+          end
       
+          module InstanceMethods 
+                    
+            def perform_action_with_fiveruns_dash_context(*args, &block)
+              action_name = (request.parameters['action'] || 'index').to_s
+              Fiveruns::Dash::Rails::Context.set ['action', %(#{self.class.name}##{action_name})]
+              perform_action_without_fiveruns_dash_context(*args, &block)
+            end
+        
+          end
+      
+        end
+        
+      end 
       
     end
     
   end
-  
+
 end

@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) << "/../lib/fiveruns/dash/rails/startup"
+require File.dirname(__FILE__) << "/lib/fiveruns/dash/rails/startup"
 
 if START_FIVERUNS_DASH_RAILS
 
