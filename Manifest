@@ -3,6 +3,7 @@ init.rb
 lib/fiveruns/dash/rails/startup.rb
 lib/fiveruns/dash/rails/version.rb
 lib/fiveruns/dash/rails.rb
+lib/fiveruns/dash/view_context.rb
 lib/fiveruns_dash_rails.rb
 Manifest
 rails/init.rb
