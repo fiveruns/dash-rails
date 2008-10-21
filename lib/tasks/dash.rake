@@ -2,6 +2,8 @@ namespace :dash do
   desc "Verify FiveRuns Dash connectivity and configuration"
   task :test => :environment do
     begin
+      RAILS_DEFAULT_LOGGER = Fiveruns::Dash.logger = Logger.new(STDOUT)
+      Fiveruns::Dash.logger.level = Logger::WARN
       verify('FiveRuns Dash loaded',
              'The FiveRuns Dash plugin has not been loaded.  Verify you are initializing Dash in config/initializers/dash.rb.') do
         defined? ::Fiveruns::Dash::Rails
@@ -13,7 +15,7 @@ namespace :dash do
       verify('FiveRuns Dash session running', "FiveRuns Dash session is not active") do
         Fiveruns::Dash.session.reporter.alive?
       end
-      verify('FiveRuns Dash network connectivity', "Error contacting the Dash service: ") do
+      verify('FiveRuns Dash network connectivity') do
         Fiveruns::Dash.session.reporter.ping
       end
     rescue ArgumentError
@@ -21,7 +23,7 @@ namespace :dash do
   end
 end
 
-def verify(test, fail)
+def verify(test, fail=nil)
   $test_count = ($test_count || 0) + 1
   print "  #{$test_count}. #{test}..."
   begin
@@ -29,11 +31,14 @@ def verify(test, fail)
     if result
       puts "OK."
     else
-      puts "FAIL!"
-      puts e.message if e
-      puts fail
+      if fail
+        puts "FAIL!"
+        puts fail
+      end
       raise ArgumentError
     end
+  rescue ArgumentError => ex
+    raise ex
   rescue => e
     puts "FAIL!"
     puts fail
