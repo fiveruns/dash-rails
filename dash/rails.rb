@@ -27,9 +27,11 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
                                      Fiveruns::Dash::Rails::ViewContext)
     
     if defined?(Mongrel)
-      ObjectSpace.each_object do |obj|
-        if obj.class == Mongrel::HttpServer
-          Fiveruns::Dash::Rails.server = obj
+      ActiveSupport::Deprecation.silence do
+        ObjectSpace.each_object do |obj|
+          if obj.class == Mongrel::HttpServer
+            Fiveruns::Dash::Rails.server = obj
+          end
         end
       end
     end
