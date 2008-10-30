@@ -21,10 +21,16 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
     require File.dirname(__FILE__) << "/../lib/fiveruns/dash/rails"
     ActionController::Base.send(:include, 
                                 Fiveruns::Dash::Rails::ActionContext)
-    ActionView::Template.send(:include, 
-                              Fiveruns::Dash::Rails::ViewContext)
-    ActionView::PartialTemplate.send(:include, 
-                                     Fiveruns::Dash::Rails::ViewContext)
+    if Fiveruns::Dash::Rails::Version.rails >= Fiveruns::Dash::Rails::Version.new(2,1,0)
+      ActionView::Template.send(:include, 
+                                Fiveruns::Dash::Rails::TemplateContext)
+      ActionView::PartialTemplate.send(:include, 
+                                       Fiveruns::Dash::Rails::TemplateContext)
+    elsif Fiveruns::Dash::Rails::Version.rails >= Fiveruns::Dash::Rails::Version.new(2,0,0)
+      # Rails 2.0 goes here
+    else
+      # Rails 1.2 goes here
+    end
     
     if defined?(Mongrel)
       ActiveSupport::Deprecation.silence do

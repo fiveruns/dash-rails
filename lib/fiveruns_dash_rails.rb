@@ -4,5 +4,5 @@ if START_FIVERUNS_DASH_RAILS
   gem 'fiveruns_dash' # Put its path first
   require 'fiveruns/dash'
   require 'fiveruns/dash/rails'
-  require 'fiveruns/dash/view_context'
+  require 'fiveruns/dash/template_context'
 end

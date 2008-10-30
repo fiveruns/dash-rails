@@ -1,3 +1,4 @@
+# AKK: remove me in favor of inlining into init
 START_FIVERUNS_DASH_RAILS = if ENV['START_FIVERUNS_DASH'] || File.basename($0) != 'irb'
   true
 else
@@ -14,5 +15,3 @@ else
   end
   false
 end
-  
-  

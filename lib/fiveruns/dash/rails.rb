@@ -52,13 +52,13 @@ if START_FIVERUNS_DASH_RAILS
             RAILS_DEFAULT_LOGGER.info "Starting Dash"
             Fiveruns::Dash.session.start 
           else
-            log_error unless ::Rails.env == 'development'
+            log_error unless env == 'development'
           end
         end
         
         def self.configure(tokens = {}, &block)
           tokens.each do |environment, token|
-            if environment.to_s == ::Rails.env
+            if environment.to_s == self.env
               Fiveruns::Dash.configure({:app => token}, &block)
               break
             end
@@ -91,6 +91,12 @@ if START_FIVERUNS_DASH_RAILS
               [nil, Fiveruns::Dash::Rails::Context.context]
             end
           end
+        end
+        
+        def self.env
+          Rails.env # >= Rails 2.1
+        rescue
+          ENV['RAILS_ENV'] # <= Rails 2.0 
         end
         
         module Context

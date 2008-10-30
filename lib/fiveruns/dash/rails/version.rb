@@ -39,6 +39,15 @@ module Fiveruns
         def self.[](major, minor, tiny)
           new(major, minor, tiny)
         end
+        
+        # Borrowed from TuneUp
+        def self.rails
+          @rails ||= begin
+            # handle ::Rails::VERSION not being set
+            Version.new(::Rails::VERSION::MAJOR, ::Rails::VERSION::MINOR, ::Rails::VERSION::TINY) rescue Version.new(0,0,0)
+          end
+        end
+        
 
         attr_reader :major, :minor, :tiny
 
