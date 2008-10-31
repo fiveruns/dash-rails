@@ -72,7 +72,7 @@ if START_FIVERUNS_DASH_RAILS
     ===
     In config/initializers/dash.rb or at the bottom of config/environment.rb, please add:
 
-      Fiveruns::Dash::Rails.configure :#{::Rails.env} => 'YOUR-#{::Rails.env.upcase}-ENV-APP-TOKEN-HERE'
+      Fiveruns::Dash::Rails.configure :#{env} => 'YOUR-#{env.upcase}-ENV-APP-TOKEN-HERE'
 
     You can also set app tokens for other environments (eg, staging), at the same time.
     See http://todo/path/to/help for more information
@@ -94,7 +94,7 @@ if START_FIVERUNS_DASH_RAILS
         end
         
         def self.env
-          Rails.env # >= Rails 2.1
+          ::Rails.env # >= Rails 2.1
         rescue
           ENV['RAILS_ENV'] # <= Rails 2.0 
         end
