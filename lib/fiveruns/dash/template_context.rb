@@ -17,14 +17,16 @@ module Fiveruns::Dash::Rails::TemplateContext
     def render_with_fiveruns_dash_context(*args, &block)
       original_context = Fiveruns::Dash::Rails::Context.context.dup
       
-      template = Fiveruns::Dash::Rails::TemplateContext.sanitize_view_path(path)
-      Fiveruns::Dash::Rails::Context.context << 'view'
-      Fiveruns::Dash::Rails::Context.context << template
+      begin
+        template = Fiveruns::Dash::Rails::TemplateContext.sanitize_view_path(path)
+        Fiveruns::Dash::Rails::Context.context << 'view'
+        Fiveruns::Dash::Rails::Context.context << template
+        result = render_without_fiveruns_dash_context(*args, &block)
+      ensure
+        Fiveruns::Dash::Rails::Context.set original_context
+      end
       
-      result = render_without_fiveruns_dash_context(*args, &block)
-      
-      Fiveruns::Dash::Rails::Context.set original_context
-      return result
+      result
     end
     
   end

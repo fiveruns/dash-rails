@@ -101,15 +101,15 @@ if START_FIVERUNS_DASH_RAILS
         
         module Context
           def self.set(value)
-            ::Fiveruns::Dash.sync { @context = value }
+            Thread.current[:fiveruns_dash_context] = value
           end
         
           def self.reset
-            ::Fiveruns::Dash.sync { @context = [] }
+            Thread.current[:fiveruns_dash_context] = []
           end
         
           def self.context
-            @context ||= []
+            Thread.current[:fiveruns_dash_context] ||= []
           end
         end
         
