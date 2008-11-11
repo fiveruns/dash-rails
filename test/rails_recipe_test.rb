@@ -1,4 +1,4 @@
-require 'test_helper'
+require File.dirname(__FILE__) << "/test_helper"
 
 ActionController::Routing::Routes.draw do |map|
   map.connect ':controller/:action/:id'
