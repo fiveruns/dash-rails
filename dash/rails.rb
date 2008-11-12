@@ -3,8 +3,11 @@ Fiveruns::Dash.register_recipe :actionpack, :url => 'http://dash.fiveruns.com' d
   recipe.time :response_time, :method => 'ActionController::Base#perform_action'
   recipe.counter :requests, 'Requests', :incremented_by => 'ActionController::Base#perform_action'
   
-  if defined?(ActionView::Template)  
-    recipe.time :render_time, :method => %w(ActionView::Template#render ActionView::PartialTemplate#render)
+  targets = []
+  targets << 'ActionView::Template#render' if defined?(ActionView::Template)
+  targets << 'ActionView::PartialTemplate#render' if defined?(ActionView::PartialTemplate)
+  if !targets.empty?
+    recipe.time :render_time, :method => targets
   else
     Fiveruns::Dash.logger.warn 'Collection of "render_time" unsupported for this version of Rails'
   end
@@ -21,16 +24,10 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
     require File.dirname(__FILE__) << "/../lib/fiveruns/dash/rails"
     ActionController::Base.send(:include, 
                                 Fiveruns::Dash::Rails::ActionContext)
-    if Fiveruns::Dash::Rails::Version.rails >= Fiveruns::Dash::Rails::Version.new(2,1,0)
-      ActionView::Template.send(:include, 
-                                Fiveruns::Dash::Rails::TemplateContext)
-      ActionView::PartialTemplate.send(:include, 
-                                       Fiveruns::Dash::Rails::TemplateContext)
-    elsif Fiveruns::Dash::Rails::Version.rails >= Fiveruns::Dash::Rails::Version.new(2,0,0)
-      # Rails 2.0 goes here
-    else
-      # Rails 1.2 goes here
-    end
+    ActionView::Template.send(:include, 
+                                Fiveruns::Dash::Rails::TemplateContext) if defined?(ActionView::Template)
+    ActionView::PartialTemplate.send(:include, 
+                                Fiveruns::Dash::Rails::TemplateContext) if defined?(ActionView::PartialTemplate)
     
     if defined?(Mongrel)
       ActiveSupport::Deprecation.silence do
