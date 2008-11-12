@@ -29,13 +29,21 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
     ActionView::PartialTemplate.send(:include, 
                                 Fiveruns::Dash::Rails::TemplateContext) if defined?(ActionView::PartialTemplate)
     
-    if defined?(Mongrel)
-      ActiveSupport::Deprecation.silence do
-        ObjectSpace.each_object do |obj|
-          if obj.class == Mongrel::HttpServer
-            Fiveruns::Dash::Rails.server = obj
+    begin
+      if defined?(Mongrel)
+        ActiveSupport::Deprecation.silence do
+          ObjectSpace.each_object do |obj|
+            if obj.class == Mongrel::HttpServer
+              Fiveruns::Dash::Rails.server = obj
+            end
           end
         end
+      end
+    rescue Exception => e
+      if RUBY_PLATFORM =~ /java/ && e.message =~ /ObjectSpace/
+        puts "Unable to access ObjectSpace: #{e.message}"
+      else
+        raise e
       end
     end
   end
