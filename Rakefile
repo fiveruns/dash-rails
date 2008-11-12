@@ -25,7 +25,7 @@ spec = Gem::Specification.new do |s|
   s.homepage = HOMEPAGE
   s.add_dependency('fiveruns_dash')
   s.require_path = 'lib'
-  s.files = %w(Rakefile) + FileList["{lib,test}/**/*"]
+  s.files = %w(Rakefile) + FileList["{lib,test,dash}/**/*"]
 end
 
 Rake::GemPackageTask.new(spec) do |pkg|
@@ -43,15 +43,25 @@ task :default => :test
 sudo = RUBY_PLATFORM[/win/] ? '' : 'sudo '
 
 desc "Install as a gem"
-task :install => [:package] do
+task :install => [:package, :uninstall] do
   sh %{#{sudo}gem install pkg/#{NAME}-#{GEM_VERSION} --no-update-sources}
+end
+
+desc "Uninstall the gem"
+task :uninstall do
+  sh %{#{sudo}gem uninstall #{NAME} -aIxv #{GEM_VERSION}} rescue nil
 end
 
 namespace :jruby do
 
   desc "Run :package and install the resulting .gem with jruby"
-  task :install => :package do
+  task :install => [:package, 'jruby:uninstall'] do
     sh %{#{sudo}jruby -S gem install #{install_home} pkg/#{NAME}-#{GEM_VERSION}.gem --no-rdoc --no-ri}
+  end
+  
+  desc "Uninstall the gem"
+  task :uninstall do
+    sh %{#{sudo}jruby -S gem uninstall #{NAME} -aIxv #{GEM_VERSION}} rescue nil
   end
   
 end
