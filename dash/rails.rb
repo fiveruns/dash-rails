@@ -32,6 +32,9 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
     begin
       if defined?(Mongrel)
         ActiveSupport::Deprecation.silence do
+          # Unfortunately there is no known way to get direct access
+          # to the Mongrel singleton.  Wade through the Ruby heap to
+          # find it.
           ObjectSpace.each_object do |obj|
             if obj.class == Mongrel::HttpServer
               Fiveruns::Dash::Rails.server = obj
@@ -41,7 +44,7 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
       end
     rescue Exception => e
       if RUBY_PLATFORM =~ /java/ && e.message =~ /ObjectSpace/
-        puts "Unable to access ObjectSpace: #{e.message}"
+        Fiveruns::Dash.logger.info "Cannot find Mongrel: #{e.message}"
       else
         raise e
       end
