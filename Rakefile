@@ -25,7 +25,7 @@ spec = Gem::Specification.new do |s|
   s.homepage = HOMEPAGE
   s.add_dependency('fiveruns_dash')
   s.require_path = 'lib'
-  s.files = %w(Rakefile) + FileList["{lib,test,dash}/**/*"]
+  s.files = %w(Rakefile init.rb) + FileList["{lib,test,dash,rails}/**/*"]
 end
 
 Rake::GemPackageTask.new(spec) do |pkg|
