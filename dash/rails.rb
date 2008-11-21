@@ -74,7 +74,7 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
     {
       :session => session_data.to_yaml, 
       :headers => controller.request.headers.to_yaml,
-      :request => { :action => "#{controller.class.name}##{controller.params[:action]}", :url => controller.request.url, :params => controller.params.inspect }.to_yaml,
+      :request => { :url => controller.request.url, :params => controller.params.inspect }.to_yaml,
     }
   end
   
