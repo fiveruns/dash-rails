@@ -6,12 +6,26 @@ module Fiveruns::Dash::Rails::TemplateContext
     base.alias_method_chain(:render, :fiveruns_dash_context)
   end
   
-  def self.sanitize_view_path(path)
-    # In the future, we may want to remove the RAILS_ROOT
-    # namespace = ['view', Fiveruns::Dash::Rails::Context.context.last + self.path.sub(/^#{Regexp.quote RAILS_ROOT}\//, '')]
-    path
+  RAILS_ROOT_RE = /\A#{Regexp.quote RAILS_ROOT}/
+
+  GEM_REs = Gem.path.map do |path|
+    /\A#{Regexp.quote path}\/gems/
   end
   
+  def self.sanitize_view_path(path)
+    return path unless path[0..0] == '/'
+
+    if path =~ RAILS_ROOT_RE
+      trimmed = path.sub(RAILS_ROOT_RE, 'RAILS_ROOT')
+      puts trimmed
+      trimmed
+    elsif (re = GEM_REs.find { |re| path =~ re })
+      trimmed = path.sub(re, 'GEMS')
+    else
+      path
+    end
+  end
+
   module InstanceMethods
     
     def render_with_fiveruns_dash_context(*args, &block)

@@ -22,6 +22,7 @@ if START_FIVERUNS_DASH_RAILS
   Fiveruns::Dash::Rails.load_recipes
   Fiveruns::Dash.configure do |config|
     config.add_recipe :ruby, :url => 'http://dash.fiveruns.com'
+    config.add_recipe :jruby, :url => 'http://dash.fiveruns.com' if RUBY_PLATFORM[/java/]
     config.add_recipe :rails, :url => 'http://dash.fiveruns.com'
   end
 
