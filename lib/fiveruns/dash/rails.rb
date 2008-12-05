@@ -46,8 +46,9 @@ if START_FIVERUNS_DASH_RAILS
           end
         end
       
-        def self.start
-          return if Fiveruns::Dash.session.reporter.started?
+        def self.start(tokens = {}, &block)
+          return if Fiveruns::Dash.session.reporter.started?  
+          configure(tokens, &block) unless tokens.empty?
           if Fiveruns::Dash.configuration.ready?
             RAILS_DEFAULT_LOGGER.info "Starting Dash"
             Fiveruns::Dash.session.start 
