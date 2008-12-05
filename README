@@ -2,7 +2,8 @@ Thanks for trying out FiveRuns Dash!  You will need to configure Dash with your
 application token before it can contact the Dash server.  Just add the following
 code to RAILS_ROOT/config/initializers/dash.rb:
 
-Fiveruns::Dash::Rails.configure :production => 'YOUR-APP-TOKEN-HERE'
+require 'fiveruns_dash_rails'
+Fiveruns::Dash::Rails.start :production => 'YOUR-APP-TOKEN-HERE'
 
 That's it!  Read more about Dash and its more advanced features here:
 
