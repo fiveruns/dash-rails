@@ -5,4 +5,5 @@ if START_FIVERUNS_DASH_RAILS
   require 'fiveruns/dash'
   require 'fiveruns/dash/rails'
   require 'fiveruns/dash/template_context'
+  require 'fiveruns/dash/active_record_context'
 end

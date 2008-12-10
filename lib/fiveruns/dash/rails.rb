@@ -94,6 +94,12 @@ if START_FIVERUNS_DASH_RAILS
           end
         end
         
+        def self.contextualize_active_record(metric)
+          metric.find_context_with do |obj, *args|
+            Fiveruns::Dash::Rails::Context.context
+          end
+        end
+
         def self.env
           ::Rails.env # >= Rails 2.1
         rescue
