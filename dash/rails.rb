@@ -31,8 +31,16 @@ Fiveruns::Dash.register_recipe :activerecord, :url => 'http://dash.fiveruns.com'
     ActiveRecord::Base.destroy 
     ActiveRecord::Base.destroy_all
     ActiveRecord::Base.delete 
-    ActiveRecord::Base.delete_all), :reentrant => true
-  recipe.time :db_time, :methods => %w(ActiveRecord::ConnectionAdapters::AbstractAdapter#log)
+    ActiveRecord::Base.delete_all), :reentrant => true, :abstract => true
+
+  recipe.time :db_time, :methods => %w(ActiveRecord::ConnectionAdapters::AbstractAdapter#log), :abstract => true
+
+  recipe.percentage :ar_util, :sources => %w(ar_time response_time) do |ar_time, response_time| 
+    ar_time / response_time
+  end
+  recipe.percentage :db_util, :sources => %w(db_time response_time) do |db_time, response_time| 
+    db_time / response_time
+  end
 end
 
 # Rails #######################################################################
