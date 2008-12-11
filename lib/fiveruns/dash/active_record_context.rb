@@ -25,13 +25,13 @@ module Fiveruns::Dash::Rails::ActiveRecordContext
     private
 
     def with_model_context
-      original_context = Fiveruns::Dash::Rails::Context.context.dup
+      original_context = Fiveruns::Dash::Context.context.dup
       begin
-        Fiveruns::Dash::Rails::Context.context << 'model'
-        Fiveruns::Dash::Rails::Context.context << name
+        Fiveruns::Dash::Context.context << 'model'
+        Fiveruns::Dash::Context.context << name
         return yield
       ensure
-        Fiveruns::Dash::Rails::Context.set original_context
+        Fiveruns::Dash::Context.set original_context
       end
     end
   end

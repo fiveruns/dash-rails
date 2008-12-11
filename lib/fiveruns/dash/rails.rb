@@ -85,18 +85,18 @@ if START_FIVERUNS_DASH_RAILS
         def self.contextualize_action_pack(metric)
           if metric.name.to_s == 'render_time'
             metric.find_context_with do |obj, *args|
-              Fiveruns::Dash::Rails::Context.context
+              Fiveruns::Dash::Context.context
             end
           else
             metric.find_context_with do |obj, *args|
-              [nil, Fiveruns::Dash::Rails::Context.context]
+              [[], Fiveruns::Dash::Context.context]
             end
           end
         end
         
         def self.contextualize_active_record(metric)
           metric.find_context_with do |obj, *args|
-            Fiveruns::Dash::Rails::Context.context
+            [[], Fiveruns::Dash::Context.context]
           end
         end
 
@@ -104,20 +104,6 @@ if START_FIVERUNS_DASH_RAILS
           ::Rails.env # >= Rails 2.1
         rescue
           ENV['RAILS_ENV'] # <= Rails 2.0 
-        end
-        
-        module Context
-          def self.set(value)
-            Thread.current[:fiveruns_dash_context] = value
-          end
-        
-          def self.reset
-            Thread.current[:fiveruns_dash_context] = []
-          end
-        
-          def self.context
-            Thread.current[:fiveruns_dash_context] ||= []
-          end
         end
         
         module ActionContext
@@ -153,7 +139,7 @@ if START_FIVERUNS_DASH_RAILS
                     
             def perform_action_with_fiveruns_dash_context(*args, &block)
               action_name = (request.parameters['action'] || 'index').to_s
-              Fiveruns::Dash::Rails::Context.set ['action', %(#{self.class.name}##{action_name})]
+              Fiveruns::Dash::Context.set ['action', %(#{self.class.name}##{action_name})]
               perform_action_without_fiveruns_dash_context(*args, &block)
             end
         

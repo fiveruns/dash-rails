@@ -31,7 +31,7 @@ Fiveruns::Dash.register_recipe :activerecord, :url => 'http://dash.fiveruns.com'
     ActiveRecord::Base.destroy 
     ActiveRecord::Base.destroy_all
     ActiveRecord::Base.delete 
-    ActiveRecord::Base.delete_all)
+    ActiveRecord::Base.delete_all), :reentrant => true
   recipe.time :db_time, :methods => %w(ActiveRecord::ConnectionAdapters::AbstractAdapter#log)
 end
 
