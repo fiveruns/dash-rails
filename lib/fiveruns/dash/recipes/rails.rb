@@ -13,46 +13,13 @@ Fiveruns::Dash.register_recipe :actionpack, :url => 'http://dash.fiveruns.com' d
   end
 end
 
-# ActiveRecord ################################################################
-Fiveruns::Dash.register_recipe :activerecord, :url => 'http://dash.fiveruns.com' do |recipe|
-  recipe.added do
-    ActiveRecord::Base.send(:include, Fiveruns::Dash::Rails::ActiveRecordContext)
-  end
-  recipe.time :ar_time, 'ActiveRecord Time', :methods => %w(
-    ActiveRecord::Base.find_by_sql 
-    ActiveRecord::Base.calculate
-    ActiveRecord::Base.create
-    ActiveRecord::Base.update 
-    ActiveRecord::Base.update_all
-    ActiveRecord::Base#update
-    ActiveRecord::Base#save 
-    ActiveRecord::Base#save!
-    ActiveRecord::Base#destroy 
-    ActiveRecord::Base.destroy 
-    ActiveRecord::Base.destroy_all
-    ActiveRecord::Base.delete 
-    ActiveRecord::Base.delete_all), :reentrant => true
-
-  recipe.time :db_time, 'Database Time', :methods => %w(ActiveRecord::ConnectionAdapters::AbstractAdapter#log)
-
-  recipe.percentage :ar_util, 'ActiveRecord Utilization', :sources => %w(ar_time response_time) do |ar_time, response_time| 
-    (ar_time / response_time) * 100.0
-  end
-  recipe.percentage :db_util, 'Database Utilization', :sources => %w(db_time response_time) do |db_time, response_time| 
-    (db_time / response_time) * 100.0
-  end
-end
-
 # Rails #######################################################################
 Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |recipe|  
   recipe.added do
     require File.dirname(__FILE__) << "/../lib/fiveruns/dash/rails"
-    ActionController::Base.send(:include, 
-                                Fiveruns::Dash::Rails::ActionContext)
-    ActionView::Template.send(:include, 
-                                Fiveruns::Dash::Rails::TemplateContext) if defined?(ActionView::Template)
-    ActionView::PartialTemplate.send(:include, 
-                                Fiveruns::Dash::Rails::TemplateContext) if defined?(ActionView::PartialTemplate)
+    ActionController::Base.send(:include, Fiveruns::Dash::Rails::ActionContext)
+    ActionView::Template.send(:include, Fiveruns::Dash::Rails::TemplateContext) if defined?(ActionView::Template)
+    ActionView::PartialTemplate.send(:include, Fiveruns::Dash::Rails::TemplateContext) if defined?(ActionView::PartialTemplate)
     
     begin
       if defined?(Mongrel)
@@ -77,15 +44,20 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
   end
   
   recipe.add_recipe :activerecord, :url => 'http://dash.fiveruns.com'
-  recipe.modify :recipe_name => :activerecord, :recipe_url => 'http://dash.fiveruns.com' do |metric|
-    Fiveruns::Dash::Rails.contextualize_active_record(metric)
-  end
-  
+
   recipe.add_recipe :actionpack, :url => 'http://dash.fiveruns.com'
   recipe.modify :recipe_name => :actionpack, :recipe_url => 'http://dash.fiveruns.com' do |metric|
-    Fiveruns::Dash::Rails.contextualize_action_pack(metric)
+    if metric.name.to_s == 'render_time'
+      metric.find_context_with do |obj, *args|
+        Fiveruns::Dash::Context.context
+      end
+    else
+      metric.find_context_with do |obj, *args|
+        [[], Fiveruns::Dash::Context.context]
+      end
+    end
   end
-  
+
   recipe.add_exceptions_from 'ActionController::Base#perform_action_without_rescue' do |ex, controller|
     session_data = nil
     begin

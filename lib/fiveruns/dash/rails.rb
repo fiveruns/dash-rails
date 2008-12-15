@@ -39,7 +39,7 @@ if START_FIVERUNS_DASH_RAILS
         end
                     
         def self.load_recipes
-          Dir[File.dirname(__FILE__) << "/../../../dash/**/*.rb"].each do |file|
+          Dir[File.dirname(__FILE__) << "/recipes/**/*.rb"].each do |file|
             require file
           end
         end
@@ -80,24 +80,6 @@ if START_FIVERUNS_DASH_RAILS
           RAILS_DEFAULT_LOGGER.warn(message.strip)
         end
         
-        def self.contextualize_action_pack(metric)
-          if metric.name.to_s == 'render_time'
-            metric.find_context_with do |obj, *args|
-              Fiveruns::Dash::Context.context
-            end
-          else
-            metric.find_context_with do |obj, *args|
-              [[], Fiveruns::Dash::Context.context]
-            end
-          end
-        end
-        
-        def self.contextualize_active_record(metric)
-          metric.find_context_with do |obj, *args|
-            [[], Fiveruns::Dash::Context.context]
-          end
-        end
-
         def self.env
           ::Rails.env # >= Rails 2.1
         rescue
