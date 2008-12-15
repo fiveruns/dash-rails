@@ -38,8 +38,6 @@ if START_FIVERUNS_DASH_RAILS
           end
         end
                     
-        # Just in case the plugin isn't being used a gem,
-        # and the packaged recipes aren't loaded automatically
         def self.load_recipes
           Dir[File.dirname(__FILE__) << "/../../../dash/**/*.rb"].each do |file|
             require file
