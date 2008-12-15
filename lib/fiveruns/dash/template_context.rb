@@ -32,15 +32,15 @@ module Fiveruns::Dash::Rails::TemplateContext
   module InstanceMethods
     
     def render_with_fiveruns_dash_context(*args, &block)
-      original_context = Fiveruns::Dash::Rails::Context.context.dup
+      original_context = Fiveruns::Dash::Context.context.dup
       
       begin
         template = Fiveruns::Dash::Rails::TemplateContext.sanitize_view_path(path)
-        Fiveruns::Dash::Rails::Context.context << 'view'
-        Fiveruns::Dash::Rails::Context.context << template
+        Fiveruns::Dash::Context.context << 'view'
+        Fiveruns::Dash::Context.context << template
         result = render_without_fiveruns_dash_context(*args, &block)
       ensure
-        Fiveruns::Dash::Rails::Context.set original_context
+        Fiveruns::Dash::Context.set original_context
       end
       
       result
