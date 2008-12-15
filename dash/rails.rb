@@ -64,7 +64,7 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
     Fiveruns::Dash::Rails.contextualize_action_pack(metric)
   end
   
-  recipe.add_exceptions_from 'ActionController::Base#perform_action_without_rescue' do |controller|
+  recipe.add_exceptions_from 'ActionController::Base#perform_action_without_rescue' do |ex, controller|
     session_data = nil
     begin
       session_data = controller.request.session.instance_variable_get("@data")
@@ -72,7 +72,8 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
       Fiveruns::Dash.logger.warn "Could not retrieve session data for exception: #{e.message}"
     end
     {
-      :session => session_data.to_yaml, 
+      :name => "#{ex.class.name} in #{controller.class.name}##{controller.params[:action]}", # Override the standard name 
+      :session => session_data.to_yaml,
       :headers => controller.request.headers.to_yaml,
       :request => { :url => controller.request.url, :params => controller.params.inspect }.to_yaml,
     }
