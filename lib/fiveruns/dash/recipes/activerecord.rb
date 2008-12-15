@@ -37,6 +37,7 @@ module Fiveruns::Dash::ActiveRecordContext
 end
 
 # ActiveRecord ################################################################
+
 Fiveruns::Dash.register_recipe :activerecord, :url => 'http://dash.fiveruns.com' do |recipe|
   recipe.added do
     ActiveRecord::Base.send(:include, Fiveruns::Dash::ActiveRecordContext)
@@ -53,16 +54,21 @@ Fiveruns::Dash.register_recipe :activerecord, :url => 'http://dash.fiveruns.com'
     ActiveRecord::Base#destroy 
     ActiveRecord::Base.destroy 
     ActiveRecord::Base.destroy_all
-    ActiveRecord::Base.delete 
+    ActiveRecord::Base.delete
     ActiveRecord::Base.delete_all), :reentrant => true
 
   recipe.time :db_time, 'Database Time', :methods => %w(ActiveRecord::ConnectionAdapters::AbstractAdapter#log)
 
-  recipe.percentage :ar_util, 'ActiveRecord Utilization', :sources => %w(ar_time response_time) do |ar_time, response_time| 
-    (ar_time / response_time) * 100.0
+  # We need a way to get the total time for a request/operation so that we can
+  # calculate the relative percentage used by AR/DB.  Default to "response_time" for the Rails
+  # recipe but daemons can set this constant to provide their own total time metric.
+  total_time = recipe.options[:ar_total_time] ? recipe.options[:ar_total_time] : "response_time"
+
+  recipe.percentage :ar_util, 'ActiveRecord Utilization', :sources => ["ar_time", total_time] do |ar_time, all_time|
+    (ar_time / all_time) * 100.0
   end
-  recipe.percentage :db_util, 'Database Utilization', :sources => %w(db_time response_time) do |db_time, response_time| 
-    (db_time / response_time) * 100.0
+  recipe.percentage :db_util, 'Database Utilization', :sources => ["db_time", total_time] do |db_time, all_time|
+    (db_time / all_time) * 100.0
   end
 
   recipe.modify :recipe_name => :activerecord, :recipe_url => 'http://dash.fiveruns.com' do |metric|
