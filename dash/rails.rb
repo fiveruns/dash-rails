@@ -15,7 +15,32 @@ end
 
 # ActiveRecord ################################################################
 Fiveruns::Dash.register_recipe :activerecord, :url => 'http://dash.fiveruns.com' do |recipe|
-  recipe.time :activity, :methods => %w(ActiveRecord::Base.find_by_sql ActiveRecord::Base.calculate)
+  recipe.added do
+    ActiveRecord::Base.send(:include, Fiveruns::Dash::Rails::ActiveRecordContext)
+  end
+  recipe.time :ar_time, 'ActiveRecord Time', :methods => %w(
+    ActiveRecord::Base.find_by_sql 
+    ActiveRecord::Base.calculate
+    ActiveRecord::Base.create
+    ActiveRecord::Base.update 
+    ActiveRecord::Base.update_all
+    ActiveRecord::Base#update
+    ActiveRecord::Base#save 
+    ActiveRecord::Base#save!
+    ActiveRecord::Base#destroy 
+    ActiveRecord::Base.destroy 
+    ActiveRecord::Base.destroy_all
+    ActiveRecord::Base.delete 
+    ActiveRecord::Base.delete_all), :reentrant => true
+
+  recipe.time :db_time, 'Database Time', :methods => %w(ActiveRecord::ConnectionAdapters::AbstractAdapter#log)
+
+  recipe.percentage :ar_util, 'ActiveRecord Utilization', :sources => %w(ar_time response_time) do |ar_time, response_time| 
+    (ar_time / response_time) * 100.0
+  end
+  recipe.percentage :db_util, 'Database Utilization', :sources => %w(db_time response_time) do |db_time, response_time| 
+    (db_time / response_time) * 100.0
+  end
 end
 
 # Rails #######################################################################
@@ -53,10 +78,7 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
   
   recipe.add_recipe :activerecord, :url => 'http://dash.fiveruns.com'
   recipe.modify :recipe_name => :activerecord, :recipe_url => 'http://dash.fiveruns.com' do |metric|
-    metric.find_context_with do |obj, *args|
-      namespace = ['model', obj.name]
-      [nil, Array(Fiveruns::Dash::Rails::Context.context) + namespace]
-    end
+    Fiveruns::Dash::Rails.contextualize_active_record(metric)
   end
   
   recipe.add_recipe :actionpack, :url => 'http://dash.fiveruns.com'
