@@ -5,4 +5,5 @@ if START_FIVERUNS_DASH_RAILS
   require 'fiveruns/dash'
   require 'fiveruns/dash/rails'
   require 'fiveruns/dash/template_context'
+  require File.dirname(__FILE__) << "/../rails/init"  
 end

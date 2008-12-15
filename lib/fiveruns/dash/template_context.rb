@@ -13,17 +13,20 @@ module Fiveruns::Dash::Rails::TemplateContext
   end
   
   def self.sanitize_view_path(path)
-    return path unless path[0..0] == '/'
-
-    if path =~ RAILS_ROOT_RE
-      trimmed = path.sub(RAILS_ROOT_RE, 'RAILS_ROOT')
-      puts trimmed
-      trimmed
-    elsif (re = GEM_REs.find { |re| path =~ re })
-      trimmed = path.sub(re, 'GEMS')
+    path = if path[0..0] == '/'
+      if path =~ RAILS_ROOT_RE
+        trimmed = path.sub(RAILS_ROOT_RE, 'RAILS_ROOT')
+        trimmed
+      elsif (re = GEM_REs.find { |re| path =~ re })
+        trimmed = path.sub(re, 'GEMS')
+      else
+        path
+      end
     else
       path
     end
+    # Remove extensions, if any
+    path.sub(/\.[^\/\\]*$/, '')
   end
 
   module InstanceMethods
