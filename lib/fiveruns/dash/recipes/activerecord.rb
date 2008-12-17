@@ -1,39 +1,52 @@
 module Fiveruns::Dash::ActiveRecordContext
-  
+  CLASS_METHODS = %w(find find_by_sql calculate create update_all destroy destroy_all delete delete_all)
+  INSTANCE_METHODS = %w(update save destroy)
+
   def self.included(base)
     class << base
-      self.send(:include, ClassMethods)
-      alias_method_chain(:find_by_sql, :dash_context)
-      alias_method_chain(:calculate, :dash_context)
+      CLASS_METHODS.each do |meth|
+        self.class_eval <<-EOM
+          def #{meth}_with_dash_context(*args, &block)
+            Fiveruns::Dash::ActiveRecordContext.with_model_context(self.name) do
+              #{meth}_without_dash_context(*args, &block)
+            end
+          end
+        EOM
+        alias_method_chain(meth.to_sym, :dash_context)
+      end
+    end
+
+    INSTANCE_METHODS.each do |meth|
+      base.class_eval <<-EOM
+        def #{meth}_with_dash_context(*args, &block)
+          Fiveruns::Dash::ActiveRecordContext.with_model_context(self.class.name) do
+            #{meth}_without_dash_context(*args, &block)
+          end
+        end
+      EOM
+      base.alias_method_chain(meth.to_sym, :dash_context)
+    end
+  end
+
+  def self.with_model_context(model_name)
+    ctx = Fiveruns::Dash::Context.context
+    # don't change context if model context has already been set.
+    return yield if ctx.size > 0 && ctx[-2] == 'model'
+
+    original_context = Fiveruns::Dash::Context.context.dup
+    begin
+      Fiveruns::Dash::Context.context << 'model'
+      Fiveruns::Dash::Context.context << model_name
+      return yield
+    ensure
+      Fiveruns::Dash::Context.set original_context
     end
   end
   
-  module ClassMethods
-    def find_by_sql_with_dash_context(*args, &block)
-      with_model_context do
-        find_by_sql_without_dash_context(*args, &block)
-      end
-    end
-    
-    def calculate_with_dash_context(*args, &block)
-      with_model_context do
-        calculate_without_dash_context(*args, &block)
-      end
-    end
-
-    private
-
-    def with_model_context
-      original_context = Fiveruns::Dash::Context.context.dup
-      begin
-        Fiveruns::Dash::Context.context << 'model'
-        Fiveruns::Dash::Context.context << name
-        return yield
-      ensure
-        Fiveruns::Dash::Context.set original_context
-      end
-    end
+  def self.all_methods
+    CLASS_METHODS.map { |m| "ActiveRecord::Base.#{m}" } + INSTANCE_METHODS.map { |m| "ActiveRecord::Base##{m}"}
   end
+
 end
 
 # ActiveRecord ################################################################
@@ -42,21 +55,7 @@ Fiveruns::Dash.register_recipe :activerecord, :url => 'http://dash.fiveruns.com'
   recipe.added do
     ActiveRecord::Base.send(:include, Fiveruns::Dash::ActiveRecordContext)
   end
-  recipe.time :ar_time, 'ActiveRecord Time', :methods => %w(
-    ActiveRecord::Base.find_by_sql 
-    ActiveRecord::Base.calculate
-    ActiveRecord::Base.create
-    ActiveRecord::Base.update 
-    ActiveRecord::Base.update_all
-    ActiveRecord::Base#update
-    ActiveRecord::Base#save 
-    ActiveRecord::Base#save!
-    ActiveRecord::Base#destroy 
-    ActiveRecord::Base.destroy 
-    ActiveRecord::Base.destroy_all
-    ActiveRecord::Base.delete
-    ActiveRecord::Base.delete_all), :reentrant => true
-
+  recipe.time :ar_time, 'ActiveRecord Time', :methods => Fiveruns::Dash::ActiveRecordContext.all_methods, :reentrant => true
   recipe.time :db_time, 'Database Time', :methods => %w(ActiveRecord::ConnectionAdapters::AbstractAdapter#log)
 
   # We need a way to get the total time for a request/operation so that we can
