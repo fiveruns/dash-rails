@@ -1,14 +1,17 @@
 module Fiveruns::Dash::ActiveRecordContext
-  CLASS_METHODS = %w(find find_by_sql calculate create update_all destroy destroy_all delete delete_all)
-  INSTANCE_METHODS = %w(update save destroy)
+  CLASS_METHODS = %w(find find_by_sql calculate create create! update_all destroy destroy_all delete delete_all)
+  INSTANCE_METHODS = %w(update save save! destroy)
 
   def self.included(base)
     class << base
       CLASS_METHODS.each do |meth|
+        head = meth
+        tail = ''
+        head, tail = meth[0..(meth.length-2)], meth[-1..-1] if %w(? !).include? meth[-1..-1]
         self.class_eval <<-EOM
-          def #{meth}_with_dash_context(*args, &block)
+          def #{head}_with_dash_context#{tail}(*args, &block)
             Fiveruns::Dash::ActiveRecordContext.with_model_context(self.name) do
-              #{meth}_without_dash_context(*args, &block)
+              #{head}_without_dash_context#{tail}(*args, &block)
             end
           end
         EOM
@@ -17,10 +20,13 @@ module Fiveruns::Dash::ActiveRecordContext
     end
 
     INSTANCE_METHODS.each do |meth|
+      head = meth
+      tail = ''
+      head, tail = meth[0..meth.length-2], meth[-1..-1] if %w(? !).include? meth[-1..-1]
       base.class_eval <<-EOM
-        def #{meth}_with_dash_context(*args, &block)
+        def #{head}_with_dash_context#{tail}(*args, &block)
           Fiveruns::Dash::ActiveRecordContext.with_model_context(self.class.name) do
-            #{meth}_without_dash_context(*args, &block)
+            #{head}_without_dash_context#{tail}(*args, &block)
           end
         end
       EOM
@@ -46,7 +52,7 @@ module Fiveruns::Dash::ActiveRecordContext
   def self.all_methods
     CLASS_METHODS.map { |m| "ActiveRecord::Base.#{m}" } + INSTANCE_METHODS.map { |m| "ActiveRecord::Base##{m}"}
   end
-
+  
 end
 
 # ActiveRecord ################################################################
@@ -72,7 +78,11 @@ Fiveruns::Dash.register_recipe :activerecord, :url => 'http://dash.fiveruns.com'
 
   recipe.modify :recipe_name => :activerecord, :recipe_url => 'http://dash.fiveruns.com' do |metric|
     metric.find_context_with do |obj, *args|
-      [[], Fiveruns::Dash::Context.context]
+      if Fiveruns::Dash::Context.context == []
+        []
+      else
+        [[], Fiveruns::Dash::Context.context]
+      end
     end
   end
 end
