@@ -1,3 +1,18 @@
+module Fiveruns::Dash::Rails::Hash
+  
+  def self.clean(extended_hash)
+    extended_hash.keys.inject({}) do |all, key|
+      val = extended_hash[key]
+      if val.kind_of? Hash
+        val = clean(val)
+      end
+      all[key.to_s] = val
+      all
+    end
+  end
+  
+end
+
 # ActionPack ##################################################################
 Fiveruns::Dash.register_recipe :actionpack, :url => 'http://dash.fiveruns.com' do |recipe|
   recipe.time :response_time, :method => 'ActionController::Base#perform_action'
@@ -66,8 +81,8 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
     end
     {
       :name => "#{ex.class.name} in #{controller.class.name}##{controller.params[:action]}", # Override the standard name 
-      :session => session_data.to_yaml,
-      :headers => controller.request.headers.to_yaml,
+      :session => Fiveruns::Dash::Rails::Hash.clean(session_data).to_yaml,
+      :headers => Fiveruns::Dash::Rails::Hash.clean(controller.request.headers).to_yaml,
       :request => { :url => controller.request.url, :params => controller.params.inspect }.to_yaml,
     }
   end
@@ -75,5 +90,4 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
   recipe.absolute :queue_size do
     Fiveruns::Dash::Rails.queue_size || 0
   end
-  
 end
