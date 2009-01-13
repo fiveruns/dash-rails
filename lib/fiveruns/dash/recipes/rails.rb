@@ -30,33 +30,6 @@ end
 
 # Rails #######################################################################
 Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |recipe|  
-  recipe.added do
-    ActionController::Base.send(:include, Fiveruns::Dash::Rails::ActionContext)
-    ActionView::Template.send(:include, Fiveruns::Dash::Rails::TemplateContext) if defined?(ActionView::Template)
-    ActionView::PartialTemplate.send(:include, Fiveruns::Dash::Rails::TemplateContext) if defined?(ActionView::PartialTemplate)
-    
-    begin
-      if defined?(Mongrel)
-        ActiveSupport::Deprecation.silence do
-          # Unfortunately there is no known way to get direct access
-          # to the Mongrel singleton.  Wade through the Ruby heap to
-          # find it.
-          ObjectSpace.each_object do |obj|
-            if obj.class == Mongrel::HttpServer
-              Fiveruns::Dash::Rails.server = obj
-            end
-          end
-        end
-      end
-    rescue Exception => e
-      if RUBY_PLATFORM =~ /java/ && e.message =~ /ObjectSpace/
-        Fiveruns::Dash.logger.info "Cannot find Mongrel: #{e.message}"
-      else
-        raise e
-      end
-    end
-  end
-  
   recipe.add_recipe :activerecord, :url => 'http://dash.fiveruns.com'
 
   recipe.add_recipe :actionpack, :url => 'http://dash.fiveruns.com'
@@ -85,6 +58,34 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
       :headers => Fiveruns::Dash::Rails::Hash.clean(controller.request.headers).to_yaml,
       :request => { :url => controller.request.url, :params => controller.params.inspect }.to_yaml,
     }
+  end
+  
+  recipe.added do
+    ActionController::Base.send(:include, Fiveruns::Dash::Rails::ActionContext)
+    ActionView::Template.send(:include, Fiveruns::Dash::Rails::TemplateContext) if defined?(ActionView::Template)
+    ActionView::InlineTemplate.send(:include, Fiveruns::Dash::Rails::TemplateContext) if defined?(ActionView::InlineTemplate)
+    ActionView::PartialTemplate.send(:include, Fiveruns::Dash::Rails::TemplateContext) if defined?(ActionView::PartialTemplate)
+
+    begin
+      if defined?(Mongrel)
+        ActiveSupport::Deprecation.silence do
+          # Unfortunately there is no known way to get direct access
+          # to the Mongrel singleton.  Wade through the Ruby heap to
+          # find it.
+          ObjectSpace.each_object do |obj|
+            if obj.class == Mongrel::HttpServer
+              Fiveruns::Dash::Rails.server = obj
+            end
+          end
+        end
+      end
+    rescue Exception => e
+      if RUBY_PLATFORM =~ /java/ && e.message =~ /ObjectSpace/
+        Fiveruns::Dash.logger.info "Cannot find Mongrel: #{e.message}"
+      else
+        raise e
+      end
+    end
   end
   
   recipe.absolute :queue_size do
