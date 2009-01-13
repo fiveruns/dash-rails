@@ -37,12 +37,18 @@ module Fiveruns::Dash::ActiveRecordContext
   def self.with_model_context(model_name)
     ctx = Fiveruns::Dash::Context.context
     # don't change context if model context has already been set.
-    return yield if ctx.size > 0 && ctx[-2] == 'model'
+    return yield if ctx.size > 0 && ctx[-2] == 'model' && ctx[-1] == model_name
 
     original_context = Fiveruns::Dash::Context.context.dup
     begin
-      Fiveruns::Dash::Context.context << 'model'
-      Fiveruns::Dash::Context.context << model_name
+      if ctx[-2] == 'model'
+        # Some models will internally load other models.
+        Fiveruns::Dash::Context.context.pop
+        Fiveruns::Dash::Context.context << model_name
+      else
+        Fiveruns::Dash::Context.context << 'model'
+        Fiveruns::Dash::Context.context << model_name
+      end
       return yield
     ensure
       Fiveruns::Dash::Context.set original_context
@@ -58,9 +64,6 @@ end
 # ActiveRecord ################################################################
 
 Fiveruns::Dash.register_recipe :activerecord, :url => 'http://dash.fiveruns.com' do |recipe|
-  recipe.added do
-    ActiveRecord::Base.send(:include, Fiveruns::Dash::ActiveRecordContext)
-  end
   recipe.time :ar_time, 'ActiveRecord Time', :methods => Fiveruns::Dash::ActiveRecordContext.all_methods, :reentrant => true
   recipe.time :db_time, 'Database Time', :methods => %w(ActiveRecord::ConnectionAdapters::AbstractAdapter#log)
 
@@ -84,6 +87,10 @@ Fiveruns::Dash.register_recipe :activerecord, :url => 'http://dash.fiveruns.com'
         [[], Fiveruns::Dash::Context.context]
       end
     end
+  end
+
+  recipe.added do
+    ActiveRecord::Base.send(:include, Fiveruns::Dash::ActiveRecordContext)
   end
 end
 
