@@ -23,7 +23,7 @@ spec = Gem::Specification.new do |s|
   s.author = AUTHOR
   s.email = EMAIL
   s.homepage = HOMEPAGE
-  s.add_dependency('fiveruns_dash')
+  s.add_dependency('fiveruns_dash', '>= 0.6.2')
   s.require_path = 'lib'
   s.files = %w(Rakefile init.rb) + FileList["{lib,test,dash,rails}/**/*"]
 end
