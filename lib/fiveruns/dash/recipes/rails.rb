@@ -86,6 +86,17 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
         raise e
       end
     end
+
+    # Passenger forks the Rails processes, which has the side effect of
+    # killing our reporter thread.  We need to revive the thread.
+    class ActionController::Base
+      def perform_action_with_dash_startup(*args, &block)
+        Fiveruns::Dash.session.reporter.revive!
+        perform_action_without_dash_startup(*args, &block)
+      end
+
+      alias_method_chain :perform_action, :dash_startup
+    end
   end
   
   recipe.absolute :queue_size do
