@@ -54,9 +54,9 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
     end
     {
       :name => "#{ex.class.name} in #{controller.class.name}##{controller.params[:action]}", # Override the standard name 
-      :session => Fiveruns::Dash::Rails::Hash.clean(session_data).to_yaml,
-      :headers => Fiveruns::Dash::Rails::Hash.clean(controller.request.headers).to_yaml,
-      :request => { :url => controller.request.url, :params => controller.params.inspect }.to_yaml,
+      :session => Fiveruns::Dash::Rails::Hash.clean(session_data).to_json,
+      :headers => Fiveruns::Dash::Rails::Hash.clean(controller.request.headers).to_json,
+      :request => { :url => controller.request.url, :params => controller.params.inspect }.to_json,
     }
   end
   
