@@ -45,13 +45,15 @@ if START_FIVERUNS_DASH_RAILS
         end
       
         def self.start(tokens = {}, &block)
-          return if Fiveruns::Dash.session.reporter.started?  
-          configure(tokens, &block) unless tokens.empty?
-          if Fiveruns::Dash.configuration.ready?
-            RAILS_DEFAULT_LOGGER.info "Starting Dash"
-            Fiveruns::Dash.session.start 
-          else
-            log_error unless env == 'development'
+          return if Fiveruns::Dash.session.reporter.started?
+          ::Rails.configuration.after_initialize do
+            configure(tokens, &block) unless tokens.empty?
+            if Fiveruns::Dash.configuration.ready?
+              RAILS_DEFAULT_LOGGER.info "Starting Dash"
+              Fiveruns::Dash.session.start 
+            else
+              log_error unless env == 'development'
+            end
           end
         end
         
