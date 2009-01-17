@@ -1,7 +1,7 @@
 module Fiveruns::Dash::Rails::Hash
   
-  def self.clean(extended_hash)
-    extended_hash.keys.inject({}) do |all, key|
+  def self.clean(extended_hash = {})
+    (extended_hash || {}).keys.inject({}) do |all, key|
       val = extended_hash[key]
       if val.kind_of? Hash
         val = clean(val)
