@@ -59,7 +59,14 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
       :request => { :url => controller.request.url, :params => controller.params.inspect }.to_json,
     }
   end
-  
+
+  # Same classes as the exception_notification plugin
+  IGNORE = [ActiveRecord::RecordNotFound, ActionController::RoutingError, ActionController::UnknownController, ActionController::UnknownAction]
+
+  recipe.ignore_exceptions do |exc|
+    IGNORE.include? exc.class
+  end
+
   recipe.added do
     ActionController::Base.send(:include, Fiveruns::Dash::Rails::ActionContext)
     ActionView::Template.send(:include, Fiveruns::Dash::Rails::TemplateContext) if defined?(ActionView::Template)
