@@ -46,7 +46,8 @@ if START_FIVERUNS_DASH_RAILS
       
         def self.start(tokens = {}, &block)
           return if Fiveruns::Dash.session.reporter.started?
-          ::Rails.configuration.after_initialize do
+          ::Rails::Initializer.send(:include, Fiveruns::Dash::Rails::Initializer)
+          store_dash_start_block do 
             configure(tokens, &block) unless tokens.empty?
             if Fiveruns::Dash.configuration.ready?
               RAILS_DEFAULT_LOGGER.info "Starting Dash"
@@ -56,6 +57,15 @@ if START_FIVERUNS_DASH_RAILS
             end
           end
         end
+        
+        def self.store_dash_start_block(&block)
+          @dash_start_block = block
+        end
+        
+        def self.dash_start_block
+          @dash_start_block ||= lambda {}
+        end
+        
         
         def self.configure(tokens = {}, &block)
           tokens.each do |environment, token|
@@ -127,6 +137,24 @@ if START_FIVERUNS_DASH_RAILS
         
           end
       
+        end
+        
+        module Initializer
+          
+          def self.included(base)
+            base.send(:include, InstanceMethods)
+            base.alias_method_chain :load_application_classes, :dash
+          end
+          
+          module InstanceMethods
+            
+            def load_application_classes_with_dash
+              load_application_classes_without_dash
+              Fiveruns::Dash::Rails.dash_start_block.call
+            end            
+            
+          end
+          
         end
         
       end 
