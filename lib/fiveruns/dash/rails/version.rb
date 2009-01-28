@@ -77,9 +77,11 @@ module Fiveruns
           [@major, @minor, @tiny]
         end
 
-        MAJOR = 0
-        MINOR = 6
-        TINY  = 5
+        PARSED = YAML.load(File.read(File.dirname(__FILE__) << "/../../../../version.yml"))
+
+        MAJOR = PARSED['major']
+        MINOR = PARSED['minor']
+        TINY  = PARSED['patch']
 
         # The current version as a Version instance
         CURRENT = new(MAJOR, MINOR, TINY)
