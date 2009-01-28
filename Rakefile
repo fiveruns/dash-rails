@@ -1,36 +1,5 @@
 require 'rubygems'
-require 'rake/gempackagetask'
 require 'rake/testtask'
-
-require File.dirname(__FILE__) << "/lib/fiveruns/dash/rails/version"
-
-NAME = "fiveruns_dash_rails"
-AUTHOR = "FiveRuns Development Team"
-EMAIL = "dev@fiveruns.com"
-HOMEPAGE = "http://dash.fiveruns.com/"
-SUMMARY = "FiveRuns Dash Rails recipes"
-GEM_VERSION = Fiveruns::Dash::Rails::Version::STRING
-
-spec = Gem::Specification.new do |s|
-  s.rubyforge_project = 'fiveruns'
-  s.name = NAME
-  s.version = GEM_VERSION
-  s.platform = Gem::Platform::RUBY
-  s.has_rdoc = true
-  s.extra_rdoc_files = %w()
-  s.summary = SUMMARY
-  s.description = s.summary
-  s.author = AUTHOR
-  s.email = EMAIL
-  s.homepage = HOMEPAGE
-  s.add_dependency('fiveruns_dash', '>= 0.6.2')
-  s.require_path = 'lib'
-  s.files = %w(Rakefile init.rb) + FileList["{lib,test,dash,rails}/**/*"]
-end
-
-Rake::GemPackageTask.new(spec) do |pkg|
-  pkg.gem_spec = spec
-end
 
 Rake::TestTask.new do |t|
   t.verbose = true
@@ -39,32 +8,6 @@ Rake::TestTask.new do |t|
 end
 
 task :default => :test
-
-sudo = RUBY_PLATFORM[/win/] ? '' : 'sudo '
-
-desc "Install as a gem"
-task :install => [:package, :uninstall] do
-  sh %{#{sudo}gem install pkg/#{NAME}-#{GEM_VERSION} --no-update-sources}
-end
-
-desc "Uninstall the gem"
-task :uninstall do
-  sh %{#{sudo}gem uninstall #{NAME} -aIxv #{GEM_VERSION}} rescue nil
-end
-
-namespace :jruby do
-
-  desc "Run :package and install the resulting .gem with jruby"
-  task :install => [:package, 'jruby:uninstall'] do
-    sh %{#{sudo}jruby -S gem install #{install_home} pkg/#{NAME}-#{GEM_VERSION}.gem --no-rdoc --no-ri}
-  end
-  
-  desc "Uninstall the gem"
-  task :uninstall do
-    sh %{#{sudo}jruby -S gem uninstall #{NAME} -aIxv #{GEM_VERSION}} rescue nil
-  end
-  
-end
 
 task :coverage do
   rm_f "coverage"
@@ -77,5 +20,3 @@ task :coverage do
   end
   system "open coverage/index.html" if PLATFORM['darwin']
 end
-
-task :cruise => [:test, :coverage]
