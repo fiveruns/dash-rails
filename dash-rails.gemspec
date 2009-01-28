@@ -3,6 +3,8 @@ AUTHOR = "FiveRuns Development Team"
 EMAIL = "dev@fiveruns.com"
 HOMEPAGE = "http://dash.fiveruns.com/"
 SUMMARY = "FiveRuns Dash library for Ruby on Rails"
+
+# Important: Make sure you modify this in version.rb, too.
 GEM_VERSION = '0.6.5'
 
 spec = Gem::Specification.new do |s|
