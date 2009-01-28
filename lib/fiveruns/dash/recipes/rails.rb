@@ -46,20 +46,31 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
   end
 
   recipe.add_exceptions_from 'ActionController::Base#perform_action_without_rescue' do |ex, controller|
-    session_data = nil
+    info = {:name => "#{ex.class.name} in #{controller.class.name}##{controller.params[:action]}"}
     begin
       session_data = controller.request.session.instance_variable_get("@data")
+      info[:session] = Fiveruns::Dash::Rails::Hash.clean(session_data).to_json
     rescue Exception => e
-      Fiveruns::Dash.logger.warn "Could not retrieve session data for exception: #{e.message}"
+      Fiveruns::Dash.logger.warn "Could not dump session data for exception: #{e.message}"
+      nil
     end
-    {
-      :name => "#{ex.class.name} in #{controller.class.name}##{controller.params[:action]}", # Override the standard name 
-      :session => Fiveruns::Dash::Rails::Hash.clean(session_data).to_json,
-      :headers => Fiveruns::Dash::Rails::Hash.clean(controller.request.headers).to_json,
-      :request => { :url => controller.request.url, :params => controller.params.inspect }.to_json,
-    }
+    begin
+      request_data = { :url => controller.request.url, :params => controller.params.inspect }
+      info[:request] = Fiveruns::Dash::Rails::Hash.clean(request_data).to_json
+    rescue Exception => e 
+      Fiveruns::Dash.logger.error "Could not dump request data for exception: #{e.message}"
+      nil
+    end
+    begin
+      header_data = controller.request.headers
+      info[:headers] = Fiveruns::Dash::Rails::Hash.clean(header_data).to_json
+    rescue Exception => e 
+      Fiveruns::Dash.logger.error "Could not dump header data for exception: #{e.message}"
+      nil
+    end
+    info
   end
-
+  
   # Same classes as the exception_notification plugin
   IGNORE = [ActiveRecord::RecordNotFound, ActionController::RoutingError, ActionController::UnknownController, ActionController::UnknownAction]
 
