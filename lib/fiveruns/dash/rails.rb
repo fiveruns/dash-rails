@@ -143,15 +143,15 @@ if START_FIVERUNS_DASH_RAILS
           
           def self.included(base)
             base.send(:include, InstanceMethods)
-            base.alias_method_chain :load_application_classes, :dash
+            base.alias_method_chain :prepare_dispatcher, :dash
           end
           
           module InstanceMethods
             
-            def load_application_classes_with_dash
-              load_application_classes_without_dash
+            def prepare_dispatcher_with_dash
+              prepare_dispatcher_without_dash
               Fiveruns::Dash::Rails.dash_start_block.call
-            end            
+            end
             
           end
           
