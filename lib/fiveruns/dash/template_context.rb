@@ -35,9 +35,12 @@ module Fiveruns::Dash::Rails::TemplateContext
       original_context = Fiveruns::Dash::Context.context.dup
       
       begin
-        template = Fiveruns::Dash::Rails::TemplateContext.sanitize_view_path(path)
-        Fiveruns::Dash::Context.context << 'view'
-        Fiveruns::Dash::Context.context << template
+        if respond_to?(:path)
+          template = Fiveruns::Dash::Rails::TemplateContext.sanitize_view_path(path)
+          Fiveruns::Dash::Context.context << template
+        else
+          Fiveruns::Dash::Context.context << '(inline)'
+        end
         result = render_without_fiveruns_dash_context(*args, &block)
       ensure
         Fiveruns::Dash::Context.set original_context
