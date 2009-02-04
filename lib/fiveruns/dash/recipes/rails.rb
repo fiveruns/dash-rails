@@ -15,7 +15,7 @@ end
 
 # ActionPack ##################################################################
 Fiveruns::Dash.register_recipe :actionpack, :url => 'http://dash.fiveruns.com' do |recipe|
-  recipe.time :response_time, :method => 'ActionController::Base#perform_action'
+  recipe.time :response_time, :method => 'ActionController::Base#perform_action', :mark => true
   recipe.counter :requests, 'Requests', :incremented_by => 'ActionController::Base#perform_action'
   
   targets = []
