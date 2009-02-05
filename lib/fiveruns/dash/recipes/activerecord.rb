@@ -73,10 +73,10 @@ Fiveruns::Dash.register_recipe :activerecord, :url => 'http://dash.fiveruns.com'
   recipe.time :db_time, 'Database Time', :methods => %w(ActiveRecord::ConnectionAdapters::AbstractAdapter#log), :only_within => total_time
 
   recipe.percentage :ar_util, 'ActiveRecord Utilization', :sources => ["ar_time", total_time] do |ar_time, all_time|
-    (ar_time / all_time) * 100.0
+    all_time == 0 ? 0 : (ar_time / all_time) * 100.0
   end
   recipe.percentage :db_util, 'Database Utilization', :sources => ["db_time", total_time] do |db_time, all_time|
-    (db_time / all_time) * 100.0
+    all_time == 0 ? 0 : (db_time / all_time) * 100.0
   end
 
   recipe.modify :recipe_name => :activerecord, :recipe_url => 'http://dash.fiveruns.com' do |metric|
