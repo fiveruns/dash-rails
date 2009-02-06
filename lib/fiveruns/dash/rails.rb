@@ -98,6 +98,65 @@ if START_FIVERUNS_DASH_RAILS
           ENV['RAILS_ENV'] # <= Rails 2.0 
         end
         
+        def self.verify
+          puts ""
+          puts "FiveRuns Dash installation verification"
+          puts "======================================="
+          puts ""
+          Fiveruns::Dash.logger = Logger.new(STDOUT)
+          Fiveruns::Dash.logger.level = Logger::WARN
+          test('FiveRuns Dash loaded',
+               'The FiveRuns Dash plugin has not been loaded.  Verify you are initializing Dash in config/initializers/dash.rb.') do
+            defined? ::Fiveruns::Dash::Rails
+          end
+          test('FiveRuns Dash configuration',
+               "No application token was found for the #{Rails.env} environment.") do
+            Fiveruns::Dash.configuration.options[:app]
+          end
+          test('FiveRuns Dash session running', "FiveRuns Dash session is not active") do
+            Fiveruns::Dash.session.reporter.alive?
+          end
+          test('JSON compatibility', "Looks like you've run afoul of an ActiveSupport and JSON incompatibility. The easiest way to fix this is to load json from a gem, instead of unpacking it. See http://support.fiveruns.com/faqs/dash/json-compatibility for details.") do
+            begin
+              info = Fiveruns::Dash.session.info
+              payload = Fiveruns::Dash::InfoPayload.new(info, Time.now)
+              result = payload.to_json
+            rescue ArgumentError
+              false
+            end
+          end
+          test('FiveRuns Dash network connectivity') do
+            Fiveruns::Dash.session.reporter.ping
+          end
+          puts ""
+          puts "All appears normal.  If you are experiencing a problem, please email support@fiveruns.com with details about the problem and your environment."
+          puts ""
+        rescue ArgumentError
+        end
+        
+        def self.test(test, fail=nil)
+          $test_count = ($test_count || 0) + 1
+          print "  #{$test_count}. #{test}..."
+          begin
+            result = yield
+            if result
+              puts "OK." if fail
+            else
+              if fail
+                puts "FAIL!"
+                puts fail
+              end
+              raise ArgumentError
+            end
+          rescue ArgumentError => ex
+            raise ex
+          rescue => e
+            puts "FAIL!"
+            puts fail
+            raise e
+          end
+        end
+        
         module ActionContext
       
           def self.included(base)
