@@ -35,9 +35,9 @@ module Fiveruns::Dash::Rails::TemplateContext
       original_context = Fiveruns::Dash::Context.context.dup
       
       begin
+        Fiveruns::Dash::Context.context << 'view'
         if respond_to?(:path)
-          template = Fiveruns::Dash::Rails::TemplateContext.sanitize_view_path(path)
-          Fiveruns::Dash::Context.context << template
+          Fiveruns::Dash::Context.context << Fiveruns::Dash::Rails::TemplateContext.sanitize_view_path(path)
         else
           Fiveruns::Dash::Context.context << '(inline)'
         end
