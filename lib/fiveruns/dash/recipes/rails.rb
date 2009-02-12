@@ -117,7 +117,7 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
     end
   end
   
-  recipe.absolute :queue_size do
-    Fiveruns::Dash::Rails.queue_size || 0
-  end
+  # recipe.absolute :queue_size do
+  #   Fiveruns::Dash::Rails.queue_size || 0
+  # end
 end
