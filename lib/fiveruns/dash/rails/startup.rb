@@ -5,11 +5,13 @@ else
   module Fiveruns
     module Dash
       module Rails
+        def self.start(*args, &block)
+          RAILS_DEFAULT_LOGGER.info "[FiveRuns Dash] Skipping startup (`#{$0}' not supported)"
+        end
         
         def self.configure(*args, &block)
           RAILS_DEFAULT_LOGGER.info "[FiveRuns Dash] Skipping configuration (`#{$0}' not supported for collection)"
         end
-        
       end
     end
   end
