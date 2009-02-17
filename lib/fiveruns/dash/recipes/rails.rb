@@ -117,7 +117,7 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
         alias_method_chain :perform_action, :dash_startup
       end
     elsif defined?(PhusionPassenger)
-      # later versions of Passenger have an event to handle this gracefully
+      # Passenger 2.1+ has an event to handle this gracefully
       PhusionPassenger.on_event(:starting_worker_process) do
         Fiveruns::Dash.session.reporter.revive!
       end
