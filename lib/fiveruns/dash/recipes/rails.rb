@@ -1,3 +1,9 @@
+begin
+  require 'fiveruns/dash/recipes/activerecord'
+rescue LoadError
+  abort "Missing the `activerecord' recipe. Please install the fiveruns-dash-activerecord gem"
+end
+
 module Fiveruns::Dash::Rails::Hash
   
   def self.clean(extended_hash = {})
@@ -12,6 +18,70 @@ module Fiveruns::Dash::Rails::Hash
   end
   
 end
+
+module Fiveruns::Dash::ActiveRecordContext
+  CLASS_METHODS = %w(find find_by_sql calculate create create! update_all destroy destroy_all delete delete_all)
+  INSTANCE_METHODS = %w(update save save! destroy)
+
+  def self.included(base)
+    class << base
+      CLASS_METHODS.each do |meth|
+        head = meth
+        tail = ''
+        head, tail = meth[0..(meth.length-2)], meth[-1..-1] if %w(? !).include? meth[-1..-1]
+        self.class_eval <<-EOM
+          def #{head}_with_dash_context#{tail}(*args, &block)
+            Fiveruns::Dash::ActiveRecordContext.with_model_context(self.name) do
+              #{head}_without_dash_context#{tail}(*args, &block)
+            end
+          end
+        EOM
+        alias_method_chain(meth.to_sym, :dash_context)
+      end
+    end
+
+    INSTANCE_METHODS.each do |meth|
+      head = meth
+      tail = ''
+      head, tail = meth[0..meth.length-2], meth[-1..-1] if %w(? !).include? meth[-1..-1]
+      base.class_eval <<-EOM
+        def #{head}_with_dash_context#{tail}(*args, &block)
+          Fiveruns::Dash::ActiveRecordContext.with_model_context(self.class.name) do
+            #{head}_without_dash_context#{tail}(*args, &block)
+          end
+        end
+      EOM
+      base.alias_method_chain(meth.to_sym, :dash_context)
+    end
+  end
+
+  def self.with_model_context(model_name)
+    ctx = Fiveruns::Dash::Context.context
+    # don't change context if model context has already been set.
+    return yield if ctx.size > 0 && ctx[-2] == 'model' && ctx[-1] == model_name
+
+    original_context = Fiveruns::Dash::Context.context.dup
+    begin
+      if ctx[-2] == 'model'
+        # Some models will internally load other models.
+        Fiveruns::Dash::Context.context.pop
+        Fiveruns::Dash::Context.context << model_name
+      else
+        Fiveruns::Dash::Context.context << 'model'
+        Fiveruns::Dash::Context.context << model_name
+      end
+      return yield
+    ensure
+      Fiveruns::Dash::Context.set original_context
+    end
+  end
+  
+  def self.all_methods
+    CLASS_METHODS.map { |m| "ActiveRecord::Base.#{m}" } + INSTANCE_METHODS.map { |m| "ActiveRecord::Base##{m}"}
+  end
+  
+end
+
 
 # ActionPack ##################################################################
 Fiveruns::Dash.register_recipe :actionpack, :url => 'http://dash.fiveruns.com' do |recipe|
@@ -31,6 +101,15 @@ end
 # Rails #######################################################################
 Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |recipe|  
   recipe.add_recipe :activerecord, :url => 'http://dash.fiveruns.com'
+  recipe.modify :recipe_name => :activerecord, :recipe_url => 'http://dash.fiveruns.com' do |metric|
+    metric.find_context_with do |obj, *args|
+      if Fiveruns::Dash::Context.context == []
+        []
+      else
+        [[], Fiveruns::Dash::Context.context]
+      end
+    end
+  end
 
   recipe.add_recipe :actionpack, :url => 'http://dash.fiveruns.com'
   recipe.modify :recipe_name => :actionpack, :recipe_url => 'http://dash.fiveruns.com' do |metric|
@@ -79,6 +158,7 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
   end
 
   recipe.added do
+    ActiveRecord::Base.send(:include, Fiveruns::Dash::ActiveRecordContext)
     ActionController::Base.send(:include, Fiveruns::Dash::Rails::ActionContext)
     ActionView::Template.send(:include, Fiveruns::Dash::Rails::TemplateContext) if defined?(ActionView::Template)
     ActionView::InlineTemplate.send(:include, Fiveruns::Dash::Rails::TemplateContext) if defined?(ActionView::InlineTemplate)
