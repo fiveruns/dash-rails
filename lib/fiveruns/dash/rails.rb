@@ -68,7 +68,6 @@ if START_FIVERUNS_DASH_RAILS
           store_dash_start_block do 
             configure(tokens, &block) unless tokens.empty?
             if Fiveruns::Dash.configuration.ready?
-              RAILS_DEFAULT_LOGGER.info "Starting Dash"
               Fiveruns::Dash.session.start 
             else
               log_error unless env == 'development'
