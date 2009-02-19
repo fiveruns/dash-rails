@@ -1,4 +1,3 @@
-require File.dirname(__FILE__) << "/rails/version"
 require File.dirname(__FILE__) << "/rails/startup"
 
 if START_FIVERUNS_DASH_RAILS
@@ -7,9 +6,28 @@ if START_FIVERUNS_DASH_RAILS
     module Dash
     
       module Rails
+        
+        version_file = File.dirname(__FILE__) << "/../../../VERSION.yml"
+        version = YAML.load(version_file)
+        VERSION = [
+          version[:major],
+          version[:minor],
+          version[:patch]
+        ].map(&:to_s).join('.')
       
         class << self
           attr_accessor :server
+        end
+        
+        def self.clean_hash(obj = {})
+          (obj || {}).keys.inject({}) do |all, key|
+            val = obj[key]
+            if val.is_a?(Hash)
+              val = clean(val)
+            end
+            all[key.to_s] = val
+            all
+          end
         end
       
         def self.queue_size
@@ -79,14 +97,14 @@ if START_FIVERUNS_DASH_RAILS
         def self.log_error
           # TODO: Add URL for help
           message =<<-EOM
-  FiveRuns Dash [Rails] (v#{Version::STRING}) Application token missing
+  FiveRuns Dash [Rails] (v#{VERSION}) Application token missing
     ===
-    In config/initializers/dash.rb or at the bottom of config/environment.rb, please add:
+    In config/initializers/dash.rb please add:
 
-      Fiveruns::Dash::Rails.configure :#{env} => 'YOUR-#{env.upcase}-ENV-APP-TOKEN-HERE'
+      Fiveruns::Dash::Rails.start :#{env} => '#{env.upcase}-APP-TOKEN'
 
     You can also set app tokens for other environments (eg, staging), at the same time.
-    See http://todo/path/to/help for more information
+    See http://support.fiveruns.com/faqs/dash/rails for more information
     ===
           EOM
           RAILS_DEFAULT_LOGGER.warn(message.strip)
@@ -155,65 +173,6 @@ if START_FIVERUNS_DASH_RAILS
             puts fail
             raise e
           end
-        end
-        
-        module ActionContext
-      
-          def self.included(base)
-            base.send(:include, InstanceMethods)
-            base.alias_method_chain :perform_action, :fiveruns_dash_context
-            base.extend(ClassMethods)
-            (class << base; self; end).alias_method_chain :process, :fiveruns_dash_tracing
-          end
-        
-          module ClassMethods
-        
-            def process_with_fiveruns_dash_tracing(*args, &block)
-              operation = lambda { process_without_fiveruns_dash_tracing(*args, &block) }
-              params = args.first.parameters
-              # TODO/FIXME: For now, we simply look for a 'trace' parameter to select requests to trace; in the
-              #             future, we need a more advanced sampling mechanism (some operation in a recipe a
-              #             request must pass, or selection criteria returned in a response from the service)
-              trace_context = ['action', "#{params['controller'].camelize}Controller##{params['action']}"]
-              if ::Fiveruns::Dash.trace_contexts.include?(trace_context)
-                ::Fiveruns::Dash.session.trace(trace_context) do
-                  operation.call
-                end
-              else
-                operation.call
-              end
-            end
-        
-          end
-      
-          module InstanceMethods 
-                    
-            def perform_action_with_fiveruns_dash_context(*args, &block)
-              action_name = (request.parameters['action'] || 'index').to_s
-              Fiveruns::Dash::Context.set ['action', %(#{self.class.name}##{action_name})]
-              perform_action_without_fiveruns_dash_context(*args, &block)
-            end
-        
-          end
-      
-        end
-        
-        module Initializer
-          
-          def self.included(base)
-            base.send(:include, InstanceMethods)
-            base.alias_method_chain :prepare_dispatcher, :dash
-          end
-          
-          module InstanceMethods
-            
-            def prepare_dispatcher_with_dash
-              prepare_dispatcher_without_dash
-              Fiveruns::Dash::Rails.dash_start_block.call
-            end
-            
-          end
-          
         end
         
       end 
