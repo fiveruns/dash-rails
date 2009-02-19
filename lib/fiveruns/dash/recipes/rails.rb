@@ -2,7 +2,7 @@
 Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |recipe|
   
   recipe.add_recipe :activerecord, :url => 'http://dash.fiveruns.com',
-                    :total_time => [:response_time, :actionpack, 'http://dash.fiveruns.com']
+                    :total_time => 'response_time'
   recipe.modify :recipe_name => :activerecord, :recipe_url => 'http://dash.fiveruns.com' do |metric|
     metric.find_context_with do |obj, *args|
       if Fiveruns::Dash::Context.context == []
