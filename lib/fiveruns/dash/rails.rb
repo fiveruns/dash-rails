@@ -23,7 +23,7 @@ if START_FIVERUNS_DASH_RAILS
           (obj || {}).keys.inject({}) do |all, key|
             val = obj[key]
             if val.is_a?(Hash)
-              val = clean(val)
+              val = clean_hash(val)
             end
             all[key.to_s] = val
             all
