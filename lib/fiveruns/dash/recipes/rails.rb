@@ -5,10 +5,23 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
                     :total_time => 'response_time'
   recipe.modify :recipe_name => :activerecord, :recipe_url => 'http://dash.fiveruns.com' do |metric|
     metric.find_context_with do |obj, *args|
-      if Fiveruns::Dash::Context.context == []
-        []
+      model_name = obj.is_a?(ActiveRecord::Base) ? obj.class.name : obj.name
+      context = Fiveruns::Dash::Context.context
+      if context == []
+        context
+      elsif context.size > 0 && context[-2] == 'model' && context[-1] == model_name
+        # don't change context if model context has already been set.
+        [[], context]
       else
-        [[], Fiveruns::Dash::Context.context]
+        if context[-2] == 'model'
+          # Some models will internally load other models.
+          context.pop
+          context << model_name
+        else
+          context << 'model'
+          context << model_name
+        end
+        [[], context]
       end
     end
   end
@@ -18,6 +31,11 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
     if metric.name.to_s == 'render_time'
       metric.find_context_with do |obj, *args|
         Fiveruns::Dash::Context.context
+      end
+    elsif metric.name.to_s == 'response_time'
+      metric.find_context_with do |obj, *args|
+        action_name = (obj.request.parameters['action'] || 'index').to_s
+        Fiveruns::Dash::Context.set ['action', %(#{obj.class.name}##{action_name})]
       end
     else
       metric.find_context_with do |obj, *args|
@@ -60,7 +78,7 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
       ActionController::UnknownAction
     ].include?(exception.class)
   end
-
+  
   recipe.added do
     
     ActiveRecord::Base.send(:include, Fiveruns::Dash::Rails::Context::ActiveRecord)

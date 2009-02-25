@@ -9,9 +9,8 @@ if START_FIVERUNS_DASH_RAILS
     abort "Missing the `activerecord' recipe. Please install the fiveruns-dash-activerecord gem"
   end
   require 'fiveruns/dash/rails'
+  require 'fiveruns/dash/rails/template'
   require 'fiveruns/dash/rails/initializer'
   require 'fiveruns/dash/rails/context/action'
-  require 'fiveruns/dash/rails/context/active_record'
-  require 'fiveruns/dash/rails/context/template'
   require File.dirname(__FILE__) << "/../rails/init"  
 end
