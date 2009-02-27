@@ -1,14 +1,16 @@
 # Rails #######################################################################
 Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |recipe|
   
-  recipe.add_recipe :activerecord, :url => 'http://dash.fiveruns.com',
-                    :total_time => 'response_time'
-  recipe.modify :recipe_name => :activerecord, :recipe_url => 'http://dash.fiveruns.com' do |metric|
-    metric.find_context_with do |obj, *args|
-      if Fiveruns::Dash::Context.context == []
-        []
-      else
-        [[], Fiveruns::Dash::Context.context]
+  if defined?(ActiveRecord)
+    recipe.add_recipe :activerecord, :url => 'http://dash.fiveruns.com',
+                      :total_time => 'response_time'
+    recipe.modify :recipe_name => :activerecord, :recipe_url => 'http://dash.fiveruns.com' do |metric|
+      metric.find_context_with do |obj, *args|
+        if Fiveruns::Dash::Context.context == []
+          []
+        else
+          [[], Fiveruns::Dash::Context.context]
+        end
       end
     end
   end
@@ -54,16 +56,14 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
   
   # Same classes as the exception_notification plugin
   recipe.ignore_exceptions do |exception|
-    [ ActiveRecord::RecordNotFound,
-      ActionController::RoutingError,
-      ActionController::UnknownController,
-      ActionController::UnknownAction
-    ].include?(exception.class)
+    Fiveruns::Dash::Rails::IGNORE_EXCEPTIONS.include?(exception.class)
   end
 
   recipe.added do
     
-    ActiveRecord::Base.send(:include, Fiveruns::Dash::Rails::Context::ActiveRecord)
+    if defined?(ActiveRecord)
+      ActiveRecord::Base.send(:include, Fiveruns::Dash::Rails::Context::ActiveRecord)
+    end
     ActionController::Base.send(:include, Fiveruns::Dash::Rails::Context::Action)
     ActionView::Template.send(:include, Fiveruns::Dash::Rails::Context::Template) if defined?(ActionView::Template)
     ActionView::InlineTemplate.send(:include, Fiveruns::Dash::Rails::Context::Template) if defined?(ActionView::InlineTemplate)

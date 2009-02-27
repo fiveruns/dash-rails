@@ -14,6 +14,15 @@ if START_FIVERUNS_DASH_RAILS
           version[:minor],
           version[:patch]
         ].map(&:to_s).join('.')
+        
+        IGNORE_EXCEPTIONS = [
+          ::ActionController::RoutingError,
+          ::ActionController::UnknownController,
+          ::ActionController::UnknownAction
+        ]
+        if defined?(::ActiveRecord)
+          IGNORE_EXCEPTIONS << ::ActiveRecord::RecordNotFound
+        end
       
         class << self
           attr_accessor :server
