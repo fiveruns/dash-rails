@@ -32,21 +32,21 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
     info = {:name => "#{ex.class.name} in #{controller.class.name}##{controller.params[:action]}"}
     begin
       session_data = controller.request.session.instance_variable_get("@data")
-      info[:session] = Fiveruns::Dash::Rails.clean_hash(session_data).to_json
+      info[:session] = Fiveruns::Dash::Rails.clean_hash(session_data).to_fjson
     rescue Exception => e
       Fiveruns::Dash.logger.warn "Could not dump session data for exception: #{e.message}"
       nil
     end
     begin
       request_data = { :url => controller.request.url, :params => controller.params.inspect }
-      info[:request] = Fiveruns::Dash::Rails.clean_hash(request_data).to_json
+      info[:request] = Fiveruns::Dash::Rails.clean_hash(request_data).to_fjson
     rescue Exception => e 
       Fiveruns::Dash.logger.error "Could not dump request data for exception: #{e.message}"
       nil
     end
     begin
       header_data = controller.request.headers
-      info[:headers] = Fiveruns::Dash::Rails.clean_hash(header_data).to_json
+      info[:headers] = Fiveruns::Dash::Rails.clean_hash(header_data).to_fjson
     rescue Exception => e 
       Fiveruns::Dash.logger.error "Could not dump header data for exception: #{e.message}"
       nil

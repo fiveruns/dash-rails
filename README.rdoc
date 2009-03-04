@@ -22,7 +22,6 @@ The FiveRuns Development Team & Dash community
 
 * The fiveruns-dash-activerecord gem (http://github.com/fiveruns/dash-activerecord)
 * The fiveruns-dash-ruby gem (http://github.com/fiveruns/dash-ruby)
-* The json gem (as a dependency for fiveruns-dash-ruby)
 
 == Verifying your setup
 
@@ -35,8 +34,6 @@ This will make sure dash-rails is properly loaded, there are no known compatibil
 == Rails versions
 
 Dash has been tested with Rails 2.2 and 2.1.  It may (or may not) work with Rails 2.0 applications.
-
-We have verified an incompatibility that occurs when the +json+ gem is unpacked. The recommended workaround is to use a localized +GEM_HOME+ or a system gem.
 
 == Platforms
 

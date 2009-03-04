@@ -146,7 +146,7 @@ if START_FIVERUNS_DASH_RAILS
             begin
               info = Fiveruns::Dash.session.info
               payload = Fiveruns::Dash::InfoPayload.new(info, Time.now)
-              result = payload.to_json
+              result = payload.to_fjson
             rescue ArgumentError
               false
             end
