@@ -20,7 +20,7 @@ begin
     s.homepage = "http://github.com/fiveruns/dash-rails" 
     s.description = "Provides an API to send metrics from Rails applications to the FiveRuns Dash service" 
     s.authors = ["FiveRuns Development Team"] 
-    s.files = FileList['README.rdoc', 'Rakefile', 'VERSION.yml', 'init.rb', "{lib,rails,test}/**/*", ] 
+    s.files = FileList['README.rdoc', 'Rakefile', 'version.yml', 'init.rb', "{lib,rails,test}/**/*", ] 
     s.add_dependency 'fiveruns-dash-ruby', '>= 0.8.1' 
     s.add_dependency 'fiveruns-dash-activerecord', '>= 0.8.1'
   end 

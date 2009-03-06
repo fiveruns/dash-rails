@@ -7,8 +7,8 @@ if START_FIVERUNS_DASH_RAILS
     
       module Rails
         
-        version_file = File.dirname(__FILE__) << "/../../../VERSION.yml"
-        version = YAML.load(version_file)
+        version_file = File.expand_path(File.dirname(__FILE__) << "/../../../version.yml")
+        version = YAML.load(File.read(version_file))
         VERSION = [
           version[:major],
           version[:minor],
