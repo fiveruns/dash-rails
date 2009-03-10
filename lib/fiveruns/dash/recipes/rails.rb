@@ -1,15 +1,15 @@
 # Rails #######################################################################
-Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |recipe|
+Fiveruns::Dash.recipe :rails, :url => 'http://dash.fiveruns.com' do |recipe|
   
   if defined?(ActiveRecord)
     recipe.add_recipe :activerecord, :url => 'http://dash.fiveruns.com',
                       :total_time => 'response_time'
     recipe.modify :recipe_name => :activerecord, :recipe_url => 'http://dash.fiveruns.com' do |metric|
       metric.find_context_with do |obj, *args|
-        if Fiveruns::Dash::Context.context == []
+        if Fiveruns::Dash::Write::Context.context == []
           []
         else
-          [[], Fiveruns::Dash::Context.context]
+          [[], Fiveruns::Dash::Write::Context.context]
         end
       end
     end
@@ -19,11 +19,11 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
   recipe.modify :recipe_name => :actionpack, :recipe_url => 'http://dash.fiveruns.com' do |metric|
     if metric.name.to_s == 'render_time'
       metric.find_context_with do |obj, *args|
-        Fiveruns::Dash::Context.context
+        Fiveruns::Dash::Write::Context.context
       end
     else
       metric.find_context_with do |obj, *args|
-        [[], Fiveruns::Dash::Context.context]
+        [[], Fiveruns::Dash::Write::Context.context]
       end
     end
   end

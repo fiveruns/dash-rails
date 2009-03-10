@@ -72,12 +72,12 @@ if START_FIVERUNS_DASH_RAILS
         end
       
         def self.start(tokens = {}, &block)
-          return if Fiveruns::Dash.session.reporter.started?
+          return if Fiveruns::Dash.application.session.reporter.started?
           ::Rails::Initializer.send(:include, Fiveruns::Dash::Rails::Initializer)
           store_dash_start_block do 
             configure(tokens, &block) unless tokens.empty?
-            if Fiveruns::Dash.configuration.ready?
-              Fiveruns::Dash.session.start 
+            if Fiveruns::Dash.application.token
+              Fiveruns::Dash.application.session.start 
             else
               log_error unless env == 'development'
             end

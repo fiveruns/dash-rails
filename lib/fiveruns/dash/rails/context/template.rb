@@ -33,18 +33,18 @@ module Fiveruns::Dash::Rails::Context
     module InstanceMethods
     
       def render_with_fiveruns_dash_context(*args, &block)
-        original_context = Fiveruns::Dash::Context.context.dup
+        original_context = Fiveruns::Dash::Write::Context.context.dup
       
         begin
-          Fiveruns::Dash::Context.context << 'view'
+          Fiveruns::Dash::Write::Context.context << 'view'
           if respond_to?(:path)
-            Fiveruns::Dash::Context.context << Fiveruns::Dash::Rails::Context::Template.sanitize_view_path(path)
+            Fiveruns::Dash::Write::Context.context << Fiveruns::Dash::Rails::Context::Template.sanitize_view_path(path)
           else
-            Fiveruns::Dash::Context.context << '(inline)'
+            Fiveruns::Dash::Write::Context.context << '(inline)'
           end
           result = render_without_fiveruns_dash_context(*args, &block)
         ensure
-          Fiveruns::Dash::Context.set original_context
+          Fiveruns::Dash::Write::Context.set original_context
         end
       
         result

@@ -35,25 +35,25 @@ module Fiveruns::Dash::Rails::Context
     end
 
     def self.with_model_context(model_name)
-      context = Fiveruns::Dash::Context.context
+      context = Fiveruns::Dash::Write::Context.context
       # don't change context if model context has already been set.
       if context.size > 0 && context[-2] == 'model' && context[-1] == model_name
         return yield
       end
 
-      original_context = Fiveruns::Dash::Context.context.dup
+      original_context = Fiveruns::Dash::Write::Context.context.dup
       begin
         if context[-2] == 'model'
           # Some models will internally load other models.
-          Fiveruns::Dash::Context.context.pop
-          Fiveruns::Dash::Context.context << model_name
+          Fiveruns::Dash::Write::Context.context.pop
+          Fiveruns::Dash::Write::Context.context << model_name
         else
-          Fiveruns::Dash::Context.context << 'model'
-          Fiveruns::Dash::Context.context << model_name
+          Fiveruns::Dash::Write::Context.context << 'model'
+          Fiveruns::Dash::Write::Context.context << model_name
         end
         return yield
       ensure
-        Fiveruns::Dash::Context.set original_context
+        Fiveruns::Dash::Write::Context.set original_context
       end
     end
     
