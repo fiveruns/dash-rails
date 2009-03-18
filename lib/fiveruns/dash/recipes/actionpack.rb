@@ -4,8 +4,12 @@ Fiveruns::Dash.register_recipe :actionpack, :url => 'http://dash.fiveruns.com' d
   recipe.counter :requests, 'Requests', :incremented_by => 'ActionController::Base#perform_action'
   
   targets = []
-  targets << 'ActionView::Template#render' if defined?(ActionView::Template)
-  targets << 'ActionView::PartialTemplate#render' if defined?(ActionView::PartialTemplate)
+  if defined?(ActionView::Renderable)
+    targets << 'ActionView::Renderable#render'
+  else
+    targets << 'ActionView::Template#render' if defined?(ActionView::Template)
+    targets << 'ActionView::PartialTemplate#render' if defined?(ActionView::PartialTemplate)
+  end
   if !targets.empty?
     recipe.time :render_time, :method => targets
   else

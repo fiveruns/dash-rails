@@ -65,9 +65,14 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
       ActiveRecord::Base.send(:include, Fiveruns::Dash::Rails::Context::ActiveRecord)
     end
     ActionController::Base.send(:include, Fiveruns::Dash::Rails::Context::Action)
-    ActionView::Template.send(:include, Fiveruns::Dash::Rails::Context::Template) if defined?(ActionView::Template)
-    ActionView::InlineTemplate.send(:include, Fiveruns::Dash::Rails::Context::Template) if defined?(ActionView::InlineTemplate)
-    ActionView::PartialTemplate.send(:include, Fiveruns::Dash::Rails::Context::Template) if defined?(ActionView::PartialTemplate)
+    
+    if defined?(ActionView::Renderable)
+      ActionView::Renderable.send(:include, Fiveruns::Dash::Rails::Context::Template) 
+    else
+      ActionView::Template.send(:include, Fiveruns::Dash::Rails::Context::Template) if defined?(ActionView::Template)
+      ActionView::InlineTemplate.send(:include, Fiveruns::Dash::Rails::Context::Template) if defined?(ActionView::InlineTemplate)
+      ActionView::PartialTemplate.send(:include, Fiveruns::Dash::Rails::Context::Template) if defined?(ActionView::PartialTemplate)
+    end
 
     begin
       if defined?(Mongrel)
