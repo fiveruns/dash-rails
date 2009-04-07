@@ -70,7 +70,7 @@ Fiveruns::Dash.register_recipe :rails, :url => 'http://dash.fiveruns.com' do |re
       ActionView::Renderable.send(:include, Fiveruns::Dash::Rails::Context::Template) 
     else
       ActionView::Template.send(:include, Fiveruns::Dash::Rails::Context::Template) if defined?(ActionView::Template)
-      ActionView::InlineTemplate.send(:include, Fiveruns::Dash::Rails::Context::Template) if defined?(ActionView::InlineTemplate)
+      ActionView::InlineTemplate.send(:include, Fiveruns::Dash::Rails::Context::Template) if defined?(ActionView::InlineTemplate) && Rails.version.split('.')[1].to_i > 1
       ActionView::PartialTemplate.send(:include, Fiveruns::Dash::Rails::Context::Template) if defined?(ActionView::PartialTemplate)
     end
 

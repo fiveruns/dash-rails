@@ -26,6 +26,7 @@ module Fiveruns::Dash::Rails::Context
       else
         path
       end
+
       # Remove extensions, if any
       path.sub(/\.[^\/\\]*$/, '')
     end
@@ -37,7 +38,7 @@ module Fiveruns::Dash::Rails::Context
       
         begin
           Fiveruns::Dash::Context.context << 'view'
-          if respond_to?(:path)
+          if respond_to?(:path) && !self.is_a?(ActionView::InlineTemplate)
             Fiveruns::Dash::Context.context << Fiveruns::Dash::Rails::Context::Template.sanitize_view_path(path)
           else
             Fiveruns::Dash::Context.context << '(inline)'
@@ -55,3 +56,4 @@ module Fiveruns::Dash::Rails::Context
   end
   
 end
+
